@@ -240,12 +240,24 @@ test('reduced motion, keyboard buttons and landscape prompt', async ({ page }) =
   await expect(page.getByText('세로로 세워 주세요')).toBeVisible();
   await page.screenshot({ path: `${screenshots}/landscape.png` });
 });
-test('desktop mouse input works at 900x1280', async ({ page }) => {
-  await page.setViewportSize({ width: 900, height: 1280 }); await page.goto('/');
-  await page.getByRole('button', { name: '놀이 시작' }).click();
-  const from = await point(page, 'carrot'); const zone = (await page.getByTestId('drop-zone').boundingBox())!;
-  await page.mouse.move(from.x, from.y); await page.mouse.down();
-  await page.mouse.move(zone.x + zone.width / 2, zone.y + zone.height / 2, { steps: 10 }); await page.mouse.up();
-  await expect(page.locator('.progress-flowers')).toHaveAttribute('data-count', '1');
-  await page.screenshot({ path: `${screenshots}/desktop-drag.png` });
+test.describe('desktop browser', () => {
+  test.use({ isMobile: false, hasTouch: false });
+  test('landscape windows show the game and accept mouse input', async ({ page }) => {
+    for (const [width, height] of [[1280, 900], [1615, 1248]]) {
+      await page.setViewportSize({ width, height }); await page.goto('/');
+      await expect(page.locator('.rotate-overlay')).toBeHidden();
+      await page.screenshot({ path: `${screenshots}/desktop-${width}-welcome.png` });
+      await page.getByRole('button', { name: '놀이 시작' }).click();
+      await settleEntrance(page); await assertLayout(page, width, height);
+      const from = await point(page, 'carrot'); const zone = (await page.getByTestId('drop-zone').boundingBox())!;
+      await page.mouse.move(from.x, from.y); await page.mouse.down();
+      await page.mouse.move(zone.x + zone.width / 2, zone.y + zone.height / 2, { steps: 10 }); await page.mouse.up();
+      await expect(page.locator('.progress-flowers')).toHaveAttribute('data-count', '1');
+      await expect(game(page)).toHaveAttribute('data-round', '1');
+      await expect(game(page)).toHaveAttribute('data-phase', 'ready');
+      await card(page, 'banana').click();
+      await expect(page.locator('.progress-flowers')).toHaveAttribute('data-count', '2');
+      await page.screenshot({ path: `${screenshots}/desktop-${width}-play.png` });
+    }
+  });
 });
