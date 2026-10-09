@@ -56,6 +56,28 @@ async function assertLayout(page: Page, width: number, height: number) {
   for (let i = 1; i < bounds.length; i++) expect(bounds[i].x).toBeGreaterThan(bounds[i - 1].x + bounds[i - 1].width);
   const zone = await page.getByTestId('drop-zone').boundingBox();
   if (zone) { expect(zone.width).toBeGreaterThanOrEqual(120); expect(zone.height).toBeGreaterThanOrEqual(120); }
+  const name = (await page.locator('.friend-caption').boundingBox())!;
+  const bubble = (await page.locator('.order-bubble').boundingBox())!;
+  expect(name.x + name.width).toBeLessThanOrEqual(bubble.x - 4);
+  await assertReadableText(page);
+}
+async function assertReadableText(page: Page) {
+  const problems = await page.evaluate(() => {
+    const selectors = '.brand span, .brand strong, .eyebrow, h1, .tiny-flourish span, .welcome-action p, .welcome-bottom span:last-child, .friend-caption, .order-bubble span, .tray-caption, .food-card span, .finish-copy p, .friends-together span, .finish-action p';
+    const issues: string[] = [];
+    document.querySelectorAll<HTMLElement>(selectors).forEach(element => {
+      if (!element.getBoundingClientRect().width) return;
+      const container = element.closest('.topbar, .welcome-copy, .welcome-action, .welcome-bottom, .order-area, .order-bubble, .food-tray, .finish-copy, .friends-together, .finish-action')!;
+      const bounds = container.getBoundingClientRect();
+      const range = document.createRange(); range.selectNodeContents(element);
+      if (parseFloat(getComputedStyle(element).fontSize) < 14) issues.push(`too small: ${element.textContent}`);
+      for (const rect of range.getClientRects()) {
+        if (rect.left < Math.max(0, bounds.left) - 2 || rect.right > Math.min(innerWidth, bounds.right) + 2 || rect.top < Math.max(0, bounds.top) - 2 || rect.bottom > Math.min(innerHeight, bounds.bottom) + 2) issues.push(`clipped: ${element.textContent}`);
+      }
+    });
+    return issues;
+  });
+  expect(problems).toEqual([]);
 }
 
 test.beforeEach(async ({ page }) => {
@@ -74,6 +96,7 @@ for (const [width, height] of [[360, 800], [390, 844], [412, 915], [320, 568], [
     await page.setViewportSize({ width, height }); await page.goto('/');
     const begin = (await page.getByRole('button', { name: '놀이 시작' }).boundingBox())!;
     expect(begin.height).toBeGreaterThanOrEqual(96); expect(begin.y + begin.height).toBeLessThanOrEqual(height);
+    await assertReadableText(page);
     await page.screenshot({ path: `${screenshots}/${width}-welcome.png` });
     await page.getByRole('button', { name: '놀이 시작' }).tap();
     await settleEntrance(page);
@@ -103,6 +126,7 @@ for (const [width, height] of [[360, 800], [390, 844], [412, 915], [320, 568], [
     await expect(page.locator('.friends-together [data-animal]')).toHaveCount(3);
     const restart = (await page.getByRole('button', { name: '다시 놀기' }).boundingBox())!;
     expect(restart.y + restart.height).toBeLessThanOrEqual(height);
+    await assertReadableText(page);
     await page.screenshot({ path: `${screenshots}/${width}-finished.png` });
     await page.getByRole('button', { name: '다시 놀기' }).tap();
     await expect(game(page)).toHaveAttribute('data-round', '0');
@@ -246,6 +270,7 @@ test.describe('desktop browser', () => {
     for (const [width, height] of [[1280, 900], [1615, 1248]]) {
       await page.setViewportSize({ width, height }); await page.goto('/');
       await expect(page.locator('.rotate-overlay')).toBeHidden();
+      await assertReadableText(page);
       await page.screenshot({ path: `${screenshots}/desktop-${width}-welcome.png` });
       await page.getByRole('button', { name: '놀이 시작' }).click();
       await settleEntrance(page); await assertLayout(page, width, height);

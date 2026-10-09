@@ -2,6 +2,8 @@
 
 3살 아이를 위한 모바일 세로형 먹이 주기 놀이입니다. 음식 그림을 한 번 누르거나 친구의 몸으로 끌어다 주세요. 글을 읽지 않아도 말풍선 그림을 보고 놀 수 있습니다.
 
+**[게임 바로 열기](https://seungmin-park-psm1757.github.io/seyeon-animal-restaurant/)** · [GitHub 저장소](https://github.com/SeungMin-Park-psm1757/seyeon-animal-restaurant)
+
 ## 실행
 
 Node.js 22.12 이상이 필요합니다. PowerShell:
@@ -51,4 +53,4 @@ npm run check
 
 Vite + React + TypeScript, 단일 reducer, Pointer Events, 직접 제작한 SVG 및 CSS 애니메이션, Vite PWA/Workbox 캐시를 사용합니다. 원본 SVG는 React 컴포넌트로 포함됩니다. [게임 사양](docs/ai/GAME_SPEC.md)을 참고하세요.
 
-독립 로컬 Git 저장소/`codex/animal-restaurant` 브랜치입니다. 기존 게임 파일을 사용하거나 수정하지 않았으며, 원격 저장소 생성·푸시·배포는 하지 않습니다.
+독립 GitHub 저장소입니다. 기존 게임 파일을 사용하거나 수정하지 않았습니다. `main`에 푸시하면 GitHub Actions가 단위 테스트·빌드·브라우저 테스트를 통과한 결과만 Pages에 배포합니다. `codex/animal-restaurant`는 개발 브랜치입니다. 배포 커밋은 게임 주소의 `build-info.json`에서 확인할 수 있습니다.
