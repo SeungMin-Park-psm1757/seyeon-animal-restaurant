@@ -28,7 +28,10 @@ try {
     for (const [round, food] of ['carrot', 'banana', 'bamboo', 'carrot', 'banana', 'bamboo'].entries()) {
       await expect(page.locator('main')).toHaveAttribute('data-round', String(round));
       await expect(page.locator('main')).toHaveAttribute('data-phase', 'ready');
-      if (!round) await page.screenshot({ path: 'qa/screenshots/live-390-play.png' });
+      if (!round) {
+        await expect(page.locator('.animal-zone')).toHaveCSS('opacity', '1');
+        await page.screenshot({ path: 'qa/screenshots/live-390-play.png' });
+      }
       await page.locator(`[data-food="${food}"]`).tap();
     }
     await expect(page.getByRole('button', { name: '다시 놀기' })).toBeVisible();
@@ -47,6 +50,7 @@ try {
   await expect(desktop.locator('.rotate-overlay')).toBeHidden();
   await desktop.getByRole('button', { name: '놀이 시작' }).click();
   await expect(desktop.locator('main')).toHaveAttribute('data-phase', 'ready');
+  await expect(desktop.locator('.animal-zone')).toHaveCSS('opacity', '1');
   await desktop.screenshot({ path: 'qa/screenshots/live-desktop-play.png' });
   assert.deepEqual(errors, []);
   const result = { testedAt: new Date().toISOString(), url, commit, status: 'PASS', serviceWorkerScope: scope, titleFont: sizes, onlineSixFeeds: true, restart: true, offlineReloadAndSixFeeds: true, desktopStart: true, errors };

@@ -78,7 +78,7 @@
 - 게임: [세연이의 냠냠 동물식당](https://seungmin-park-psm1757.github.io/seyeon-animal-restaurant/), HTTPS.
 - 배포 버전: `dfd339a996e02d2d162d9cdb0aad75fc65211f88`. 공개 `build-info.json`과 일치했다. 이 문서·배포 검증 스크립트·증거 추가 커밋은 게임 코드를 변경하지 않는다.
 - [GitHub Actions 실행 37901709219](https://github.com/SeungMin-Park-psm1757/seyeon-animal-restaurant/actions/runs/37901709219): Linux에서도 단위 10개, E2E 16개 통과 후 Pages 배포 성공.
-- 2026-10-09 16:59 KST 공개 주소에서 Chromium 390×844: HTTP 200, 상단 제목 22px, 온라인 6회·재시작·오프라인 reload 후 6회·합동 축하 통과. Service Worker scope는 게임의 하위 경로와 일치, 모바일 console error/pageerror 없음.
+- 2026-10-09 17:01 KST 공개 주소에서 Chromium 390×844: HTTP 200, 상단 제목 22px, 온라인 6회·재시작·오프라인 reload 후 6회·합동 축하 통과. Service Worker scope는 게임의 하위 경로와 일치, 모바일 console error/pageerror 없음. 놀이 캡처는 캐릭터 등장 애니메이션의 불투명도 1을 기다린 뒤 저장했다.
 - 공개 주소의 1280×900 PC에서 회전 안내 없이 시작 통과. Codex 내장 브라우저에서도 공개 시작 화면과 오프라인 준비 안내를 확인했다.
 - 근거: [`qa/live-result.json`](../qa/live-result.json), [모바일 놀이](../qa/screenshots/live-390-play.png), [오프라인 완료](../qa/screenshots/live-390-offline-finished.png), [PC 놀이](../qa/screenshots/live-desktop-play.png).
 - 재현: `node qa/verify-live.mjs https://seungmin-park-psm1757.github.io/seyeon-animal-restaurant/ dfd339a996e02d2d162d9cdb0aad75fc65211f88`.
