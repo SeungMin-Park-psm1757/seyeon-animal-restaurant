@@ -1,18 +1,27 @@
 import type { AnimalId } from '../game/data';
+import type { IdleMotion } from '../game/idleMotions';
+import type { PlayId } from '../game/playEvents';
 
-export function AnimalArt({ id, mood = 'idle' }: { id: AnimalId; mood?: 'idle' | 'curious' | 'chewing' | 'delighted' }) {
+export function AnimalArt({ id, mood = 'idle', motion, play, playStep = 0, onFaceWash }: {
+  id: AnimalId;
+  mood?: 'idle' | 'curious' | 'chewing' | 'delighted' | 'sleepy';
+  motion?: IdleMotion | null;
+  play?: PlayId | null;
+  playStep?: number;
+  onFaceWash?: () => void;
+}) {
   const rabbit = id === 'rabbit';
   const monkey = id === 'monkey';
   const fur = rabbit ? '#fffdf7' : monkey ? '#c99673' : '#fffdf7';
-  return <svg className={`animal-art animal-${id} mood-${mood}`} data-animal={id} viewBox="0 0 512 512" aria-hidden="true" fill="none" stroke="#755c63" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round">
+  return <svg className={`animal-art animal-${id} mood-${mood}${motion ? ` motion-${motion}` : ''}${play ? ` play-${play}` : ''}`} data-animal={id} data-play-step={playStep} viewBox="0 0 512 512" aria-hidden="true" fill="none" stroke="#755c63" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round">
     <ellipse className="animal-shadow" cx="256" cy="467" rx="115" ry="15" fill="#755c63" opacity=".12" stroke="none" />
     <g className="animal-body">
       {monkey && <path className="tail" d="M338 389c106 17 118-69 79-83-25-9-45 18-23 32" stroke="#a6755b" strokeWidth="24" />}
-      <ellipse cx="256" cy="376" rx={monkey ? 85 : 99} ry="89" fill={fur} />
+      <ellipse className="belly" cx="256" cy="376" rx={monkey ? 85 : 99} ry="89" fill={fur} />
       {id === 'panda' && <path d="M164 346c37 28 148 28 184 0l-5 37c-52 27-125 27-179-2Z" fill="#595963" stroke="none" />}
       <ellipse cx="197" cy="448" rx="40" ry="22" fill={id === 'panda' ? '#595963' : fur} />
       <ellipse cx="315" cy="448" rx="40" ry="22" fill={id === 'panda' ? '#595963' : fur} />
-      <path d="M208 311c15 18 80 18 96 0l25 106c-47 23-96 23-145 0Z" fill={rabbit ? '#bedfd0' : monkey ? '#e4d5f3' : '#ffe6a1'} />
+      <path className="apron" d="M208 311c15 18 80 18 96 0l25 106c-47 23-96 23-145 0Z" fill={rabbit ? '#bedfd0' : monkey ? '#e4d5f3' : '#ffe6a1'} />
       <path d="M232 381h48v28c-15 10-32 10-48 0Z" fill="#fff8ee" strokeWidth="4" />
       <path d="m248 392 8 8 8-8" stroke="#d8979c" strokeWidth="5" />
       <g className="hand hand-left"><ellipse cx="170" cy="360" rx="24" ry="40" transform="rotate(25 170 360)" fill={id === 'panda' ? '#595963' : fur} /></g>
@@ -41,12 +50,22 @@ export function AnimalArt({ id, mood = 'idle' }: { id: AnimalId; mood?: 'idle' |
           <ellipse cx="219" cy="232" rx="7" ry="10" fill={id === 'panda' ? '#fffdf7' : '#755c63'} stroke="none" />
           <ellipse cx="293" cy="232" rx="7" ry="10" fill={id === 'panda' ? '#fffdf7' : '#755c63'} stroke="none" />
         </g>
-        <path d="M248 253q8-6 16 0l-8 7Z" fill="#d38d9d" strokeWidth="3" />
+        <path className="nose" d="M248 253q8-6 16 0l-8 7Z" fill="#d38d9d" strokeWidth="3" />
         <g className="mouth"><path d="M241 277q15 20 30 0" strokeWidth="5" /><ellipse className="chew-mouth" cx="256" cy="283" rx="12" ry="9" fill="#bc7c89" strokeWidth="3" /></g>
         <circle data-mouth="true" cx="256" cy="281" r="1" stroke="none" />
+        {play === 'wash' && playStep < 2 && <>
+          {playStep < 1 && <path className="food-stain stain-left" d="m169 276 10-7 10 6-5 11-12-1Z" fill="#d99855" stroke="#ba7c4c" strokeWidth="2" />}
+          <path className="food-stain stain-right" d="m320 271 11-4 8 9-8 9-11-4Z" fill="#db9a58" stroke="#ba7c4c" strokeWidth="2" />
+          <path className="face-wash-hit-area" d="M151 208c-7-56 37-89 105-89s112 33 105 89v73c-8 42-46 61-105 61s-97-19-105-61Z" fill="transparent" stroke="none" pointerEvents="all" onPointerDown={event => { event.stopPropagation(); onFaceWash?.(); }} />
+        </>}
       </g>
       <path d="m226 318 30 18 30-18" fill={rabbit ? '#91bea9' : monkey ? '#b7a4cd' : '#edc973'} strokeWidth="4" />
     </g>
+    {play === 'bedtime' && playStep === 1 && <g className={`animal-blanket blanket-${id}`}>
+      <path d="M130 360c28-33 61-25 84-14 27-29 57-24 83-9 25-22 49-17 70 5 25-17 52-8 74 12v87H130Z" fill="#d6ece3" stroke="#83aaa2" strokeWidth="6" strokeLinejoin="round" />
+      <path d="M145 389c27-19 47-17 70-6m20-18c21-13 41-11 59 3m17 10c20-13 42-11 65 5m-103 64v-49m-53 49v-48m106 48v-48m52 48v-42" fill="none" stroke="#a8cec3" strokeWidth="4" strokeLinecap="round" />
+      <path d="m252 410 7 7 7-7" fill="none" stroke="#d28fa1" strokeWidth="4" strokeLinecap="round" />
+    </g>}
     {id === 'panda' && <g className="panda-hearts" fill="#e9a2b4" stroke="none"><path d="M115 168c-26-30-55 7 0 37 55-30 26-67 0-37Z" /><path d="M395 208c-23-27-48 6 0 32 48-26 23-59 0-32Z" /></g>}
   </svg>;
 }

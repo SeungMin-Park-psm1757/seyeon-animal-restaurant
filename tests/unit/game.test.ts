@@ -63,6 +63,16 @@ describe('six gentle rounds', () => {
     expect(reducer(state, { type: 'cancel' })).toBe(state);
     expect(state.idleHint).toBe(false);
   });
+  it('clears a stale idle prompt when the child starts a mini-game', () => {
+    let state = reducer(initialState, { type: 'start' });
+    state = reducer(state, { type: 'idle' });
+    expect(state.idleHint).toBe(true);
+    state = reducer(state, { type: 'activity' });
+    expect(state.idleHint).toBe(false);
+    expect(reducer(state, { type: 'activity' })).toBe(state);
+    state = reducer(state, { type: 'choose', food: 'carrot' });
+    expect(reducer(state, { type: 'activity' })).toBe(state);
+  });
   it('accepts inclusive drop-zone edges and rejects coordinates outside', () => {
     const rect = { left: 10, right: 130, top: 20, bottom: 140 };
     expect(inside(10, 20, rect)).toBe(true);
@@ -96,5 +106,21 @@ describe('optional local audio', () => {
   it('audio unavailability cannot interrupt play', () => {
     vi.stubGlobal('AudioContext', class { constructor() { throw Error('unsupported'); } });
     expect(() => { unlockAudio(); sound('finish', false); }).not.toThrow();
+  });
+  it('plays all six quiet activity cues and respects master mute', () => {
+    const start = vi.fn();
+    const ramp = vi.fn();
+    vi.stubGlobal('AudioContext', class {
+      state = 'running'; currentTime = 0; destination = {};
+      resume() { return Promise.resolve(); }
+      createOscillator() { return { type: '', frequency: { value: 0, exponentialRampToValueAtTime: ramp }, connect: vi.fn(), start, stop: vi.fn() }; }
+      createGain() { return { gain: { setValueAtTime: vi.fn(), linearRampToValueAtTime: vi.fn(), exponentialRampToValueAtTime: vi.fn() }, connect: vi.fn() }; }
+    });
+    unlockAudio();
+    for (const cue of ['bubbles', 'pet', 'hop', 'clap', 'roll', 'peek'] as const) sound(cue, false);
+    expect(start).toHaveBeenCalledTimes(12);
+    expect(ramp).toHaveBeenCalledTimes(3);
+    sound('bubbles', true);
+    expect(start).toHaveBeenCalledTimes(12);
   });
 });
