@@ -63,6 +63,16 @@ describe('six gentle rounds', () => {
     expect(reducer(state, { type: 'cancel' })).toBe(state);
     expect(state.idleHint).toBe(false);
   });
+  it('clears a stale idle prompt when the child starts a mini-game', () => {
+    let state = reducer(initialState, { type: 'start' });
+    state = reducer(state, { type: 'idle' });
+    expect(state.idleHint).toBe(true);
+    state = reducer(state, { type: 'activity' });
+    expect(state.idleHint).toBe(false);
+    expect(reducer(state, { type: 'activity' })).toBe(state);
+    state = reducer(state, { type: 'choose', food: 'carrot' });
+    expect(reducer(state, { type: 'activity' })).toBe(state);
+  });
   it('accepts inclusive drop-zone edges and rejects coordinates outside', () => {
     const rect = { left: 10, right: 130, top: 20, bottom: 140 };
     expect(inside(10, 20, rect)).toBe(true);
