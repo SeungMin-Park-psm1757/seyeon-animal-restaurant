@@ -91,7 +91,7 @@
 
 - 신규 놀이: EVENT-07 얼굴 닦기(토끼·원숭이·판다), EVENT-08 풍선 3개, EVENT-09 이불·잠들기·깨우기, EVENT-10 선물상자·스티커 앨범을 추가했다. 기존 여섯 놀이와 20초 무입력 초대, 먹이 주기는 유지했다.
 - 스티커 6종은 localStorage에 알려진 ID만 저장하며 손상된 데이터는 정리한다. 중복은 긍정 문구로 안내하고 저장이 차단되어도 선물 놀이를 완료할 수 있다. 오프라인 reload 후 앨범 복원도 브라우저에서 확인했다.
-- 최종 `npm run check`: Vitest **24/24**, TypeScript/Vite/PWA build **PASS**, Playwright Chromium **37/37 PASS**. 프리캐시 15개, 3085.55 KiB. 실패한 테스트는 기존 숨바꼭질 E2E가 10종으로 확장된 선택 범위를 반영하지 못한 것이었으며, 결정값을 숨바꼭질로 고정하고 전체 검사 재실행에서 통과했다.
+- 최종 `npm run check`: Vitest 4.1.11 **24/24**, TypeScript/Vite/PWA build **PASS**, Playwright Chromium **37/37 PASS**. `npm audit` **0 vulnerabilities**. 프리캐시 15개, 3085.55 KiB. 실패한 테스트는 기존 숨바꼭질 E2E가 10종으로 확장된 선택 범위를 반영하지 못한 것이었으며, 결정값을 숨바꼭질로 고정하고 전체 검사 재실행에서 통과했다.
 - Playwright 터치 에뮬레이션과 캡처에서 320×568, 360×800, 390×844, 412×915, 800×1280, 1280×900의 전 놀이 및 요소 잘림·겹침 검사를 통과했다. 백그라운드/복귀는 `visibilitychange`를 브라우저에서 시뮬레이션해 진행 단계 보존과 종료 후 상태 원복을 확인했다.
 - 스크린샷: [이전 2.0 놀이 모음](../qa/v2-after-overview.jpg), [세안](../qa/v21-after/390-wash.png), [풍선](../qa/v21-after/390-balloons.png), [취침](../qa/v21-after/390-bedtime.png), [선물](../qa/v21-after/390-gift.png), [반응](../qa/v21-after/390-bedtime-reaction.png), [320px 스티커 앨범](../qa/v21-after/320-sticker-album.png). 전체 6뷰포트 기본 화면 캡처는 `qa/v21-after/screenshots/`에 보관한다.
 - 실제 Android 기기 연결이 없어 주소창 safe area, OS 앱 전환, 청감, 발열/배터리와 아이의 실제 사용 반응은 확인하지 않았다. 서비스 배포·main 병합은 수행하지 않는다.
