@@ -60,7 +60,7 @@ try {
   await expect(desktop.locator('.animal-zone')).toHaveCSS('opacity', '1');
   await desktop.screenshot({ path: 'qa/screenshots/live-desktop-play.png' });
   assert.deepEqual(errors, []);
-  const result = { testedAt: new Date().toISOString(), url, commit, status: 'PASS', serviceWorkerScope: scope, titleFont: sizes, backgroundMusic: true, musicOnlyMute: true, onlineSixFeeds: true, restart: true, offlineReloadAndSixFeeds: true, desktopStart: true, errors };
+  const result = { testedAt: new Date().toISOString(), url, commit, status: 'PASS', serviceWorkerScope: scope, titleFont: sizes, backgroundMusic: true, musicOnlyMute: true, onlineSixFeeds: true, restart: true, offlineReloadAndSixFeeds: true, offlineBackgroundMusicPlayback: true, desktopStart: true, errors };
   await writeFile('qa/live-result.json', JSON.stringify(result, null, 2) + '\n');
   console.log(JSON.stringify(result));
 } finally { await browser.close(); }

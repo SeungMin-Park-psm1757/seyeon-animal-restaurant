@@ -8,8 +8,8 @@
 |---|---|---|
 | 의존성 설치 | PASS | `npm install --no-fund --no-audit`; lockfile 저장 |
 | 타입 검사·프로덕션 빌드 | PASS | `npm run build`; React/Vite, Service Worker 및 manifest 생성 |
-| Vitest | PASS — 11개 | 순서/매핑, 배치 불변식, 오답/힌트 초기화, 중복 진행 잠금, 6회 종료·재시작, 드래그 취소·드롭 경계, master/music 음소거 분리 저장, 저장/오디오 접근 실패 |
-| Playwright Chromium | PASS — 17개 | 아래 모바일·입력·오프라인·업데이트·오디오 시나리오; 실제 Chromium 156, 터치 에뮬레이션 |
+| Vitest | PASS — 11개 | 순서/매핑, 배치 불변식, 오답/힌트 초기화, 중복 진행 잠금, 6회 종료·재시작, 드래그 취소·드롭 경계, 전체/음악 개별 음소거 분리 저장, 저장/오디오 접근 실패 |
+| Playwright Chromium | PASS — 17개 | 아래 모바일·입력·오프라인·업데이트·음악 시나리오; 실제 Chromium 156, 터치 에뮬레이션 |
 | 콘솔·실행 오류 | PASS | 게임 E2E의 console error/pageerror 수집 결과 빈 배열, 업데이트 E2E의 pageerror 빈 배열 |
 | 스크린샷 | PASS | 최종 실행에서 38개 PNG 생성; 등장 완료 후 기본 화면 캡처, 반응 화면은 실제 애니메이션 프레임 캡처. 이전 `desktop-drag.png`는 과거 증거로 보존하며 현재 수에 포함하지 않음 |
 | 독립 리뷰 | PASS | 2개 결함 수정 후 재리뷰; 지연된 SW 활성화 독립 재현에서도 놀이 유지·종료 후 갱신 확인 |
@@ -77,12 +77,12 @@
 
 - 저장소: [SeungMin-Park-psm1757/seyeon-animal-restaurant](https://github.com/SeungMin-Park-psm1757/seyeon-animal-restaurant), 공개, 기본 브랜치 `main`.
 - 게임: [세연이의 냠냠 동물식당](https://seungmin-park-psm1757.github.io/seyeon-animal-restaurant/), HTTPS.
-- 배포 버전: `dfd339a996e02d2d162d9cdb0aad75fc65211f88`. 공개 `build-info.json`과 일치했다. 이 문서·배포 검증 스크립트·증거 추가 커밋은 게임 코드를 변경하지 않는다.
-- [GitHub Actions 실행 37901709219](https://github.com/SeungMin-Park-psm1757/seyeon-animal-restaurant/actions/runs/37901709219): Linux에서도 단위 10개, E2E 16개 통과 후 Pages 배포 성공.
-- 2026-10-09 17:01 KST 공개 주소에서 Chromium 390×844: HTTP 200, 상단 제목 22px, 온라인 6회·재시작·오프라인 reload 후 6회·합동 축하 통과. Service Worker scope는 게임의 하위 경로와 일치, 모바일 console error/pageerror 없음. 놀이 캡처는 캐릭터 등장 애니메이션의 불투명도 1을 기다린 뒤 저장했다.
+- 배포 버전: `ae2333441822b3fd9b18dc412ba9c59b69b98206`. 공개 `build-info.json`과 일치했다. 개발 브랜치와 `main`에 같은 커밋을 푸시했다.
+- [GitHub Actions 음악 버전 실행](https://github.com/SeungMin-Park-psm1757/seyeon-animal-restaurant/actions/runs/37904418783)과 [최종 저장소 상태 검증 실행](https://github.com/SeungMin-Park-psm1757/seyeon-animal-restaurant/actions/runs/37904468580): 두 번 모두 단위 11개와 E2E 17개를 통과하고 Pages 배포 성공.
+- 2026-10-09 17:30 KST 공개 주소에서 Chromium 390×844: HTTP 200, 상단 제목 22px, BGM 재생·음악만 음소거·음소거 복원, 온라인 6회·재시작·오프라인 reload 후 6회와 BGM 재생 통과. Service Worker scope가 게임 하위 경로와 일치하고 console error/pageerror는 빈 배열이었다. 별도 1280×900 PC에서도 시작했다.
 - 사용자 제공 `Kickoff Bounce.mp3` (2분50초, 2.79 MB)는 PWA 프리캐시 상한 4 MiB 안에 포함한다. 앱 본체와 함께 최초 온라인 방문 때 저장되면 이후 오프라인 재생이 가능하다.
 - 공개 주소의 1280×900 PC에서 회전 안내 없이 시작 통과. Codex 내장 브라우저에서도 공개 시작 화면과 오프라인 준비 안내를 확인했다.
 - 근거: [`qa/live-result.json`](../qa/live-result.json), [모바일 놀이](../qa/screenshots/live-390-play.png), [오프라인 완료](../qa/screenshots/live-390-offline-finished.png), [PC 놀이](../qa/screenshots/live-desktop-play.png).
-- 재현: `node qa/verify-live.mjs https://seungmin-park-psm1757.github.io/seyeon-animal-restaurant/ dfd339a996e02d2d162d9cdb0aad75fc65211f88`.
+- 재현: `node qa/verify-live.mjs https://seungmin-park-psm1757.github.io/seyeon-animal-restaurant/ ae2333441822b3fd9b18dc412ba9c59b69b98206`.
 
 재현: `npm run check`. 수동 확인: `npm run build` → `npm run preview` → `http://127.0.0.1:4173` → 시작 → 말풍선 음식 탭/드래그 → 꽃 6송이 → 다시 놀기.
