@@ -1,6 +1,6 @@
 import type { AnimalId } from './data';
 
-export type PlayId = 'bubbles' | 'pet' | 'hop' | 'clap' | 'roll' | 'peek';
+export type PlayId = 'bubbles' | 'pet' | 'hop' | 'clap' | 'roll' | 'peek' | 'wash' | 'balloons' | 'bedtime' | 'gift';
 export type PlayMode = 'idle' | 'active' | 'reward';
 
 export type PlayDefinition = {
@@ -19,7 +19,11 @@ export const PLAY_EVENTS: readonly PlayDefinition[] = [
   { id: 'hop', title: '토토 폴짝폴짝', prompt: '토토와 폴짝!', icon: '🐰', button: '폴짝 뛰기', taps: 3, animals: ['rabbit'] },
   { id: 'clap', title: '몽몽 짝짝 음악회', prompt: '짝짝! 함께 박수!', icon: '👏', button: '짝짝 박수', taps: 3, animals: ['monkey'] },
   { id: 'roll', title: '팡팡 데굴데굴', prompt: '팡팡 데굴데굴!', icon: '🐼', button: '데굴데굴', taps: 2, animals: ['panda'] },
-  { id: 'peek', title: '꼭꼭 숨어라', prompt: '꽃을 눌러 까꿍!', icon: '🌼', button: '꽃 뒤의 친구 찾기', taps: 1 }
+  { id: 'peek', title: '꼭꼭 숨어라', prompt: '꽃을 눌러 까꿍!', icon: '🌼', button: '꽃 뒤의 친구 찾기', taps: 1 },
+  { id: 'wash', title: '보송보송 얼굴 닦기', prompt: '양 볼을 톡톡 닦아 주세요!', icon: 'wash', button: '얼굴 닦아 주기', taps: 2 },
+  { id: 'balloons', title: '둥실둥실 풍선', prompt: '풍선을 톡 눌러요!', icon: 'balloons', button: '풍선 띄우기', taps: 3 },
+  { id: 'bedtime', title: '코~ 잘 시간이야', prompt: '이불을 덮어 주세요!', icon: 'bedtime', button: '이불 덮고 깨우기', taps: 2 },
+  { id: 'gift', title: '두근두근 선물상자', prompt: '선물상자를 열어 봐요!', icon: 'gift', button: '선물상자 열기', taps: 2 }
 ];
 export const PLAY_BY_ID = Object.fromEntries(PLAY_EVENTS.map(event => [event.id, event])) as Record<PlayId, PlayDefinition>;
 

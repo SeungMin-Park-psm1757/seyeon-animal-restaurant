@@ -3,14 +3,14 @@ import { PLAY_BY_ID, PLAY_EVENTS, initialPlayState, playReducer, selectPlay } fr
 import { MOTIONS, nextIdleMotion } from '../../src/game/idleMotions';
 
 describe('animal village event engine', () => {
-  it('has six distinct playable games and valid goals', () => {
-    expect(new Set(PLAY_EVENTS.map(x => x.id)).size).toBe(6);
+  it('has ten distinct playable games and valid goals', () => {
+    expect(new Set(PLAY_EVENTS.map(x => x.id)).size).toBe(10);
     expect(PLAY_EVENTS.every(x => x.taps >= 1 && x.taps <= 3)).toBe(true);
   });
   it('respects animal-specific games', () => {
-    expect(selectPlay('rabbit', [], .51)).toBe('hop');
-    expect(selectPlay('monkey', [], .51)).toBe('clap');
-    expect(selectPlay('panda', [], .51)).toBe('roll');
+    expect(selectPlay('rabbit', [], .26)).toBe('hop');
+    expect(selectPlay('monkey', [], .26)).toBe('clap');
+    expect(selectPlay('panda', [], .26)).toBe('roll');
     for (const animal of ['rabbit', 'monkey', 'panda'] as const) {
       for (let i = 0; i < 10; i++) {
         const event = PLAY_BY_ID[selectPlay(animal, [], i / 10)];
@@ -20,11 +20,13 @@ describe('animal village event engine', () => {
   });
   it('avoids the last two games and promotes unseen content', () => {
     expect(selectPlay('rabbit', ['bubbles', 'pet'], 0)).toBe('hop');
-    expect(selectPlay('rabbit', ['bubbles', 'pet', 'hop'], .9)).toBe('peek');
-    expect(selectPlay('rabbit', ['bubbles', 'pet', 'hop', 'peek'], 0)).toBe('bubbles');
+    expect(selectPlay('rabbit', ['bubbles', 'pet', 'hop'], .21)).toBe('wash');
+    const history = ['bubbles', 'pet', 'hop', 'peek', 'wash', 'balloons', 'bedtime', 'gift'] as const;
+    expect(selectPlay('rabbit', history, 0)).not.toBe('gift');
+    expect(selectPlay('rabbit', history, .99)).not.toBe('bedtime');
   });
   it('requires the proper number of touches and rejects duplicate reward touches', () => {
-    let state = playReducer(initialPlayState, { type: 'open', animal: 'rabbit', roll: .51 });
+    let state = playReducer(initialPlayState, { type: 'open', animal: 'rabbit', roll: .26 });
     expect(state).toMatchObject({ mode: 'active', id: 'hop', steps: 0 });
     expect(playReducer(state, { type: 'open', animal: 'panda', roll: 0 })).toBe(state);
     for (let i = 1; i <= 3; i++) {
@@ -39,7 +41,7 @@ describe('animal village event engine', () => {
     expect(state.history).toEqual(['hop']);
   });
   it('allows cancellation without a reward and reset without stale data', () => {
-    let state = playReducer(initialPlayState, { type: 'open', animal: 'panda', roll: .51 });
+    let state = playReducer(initialPlayState, { type: 'open', animal: 'panda', roll: .26 });
     expect(state.id).toBe('roll');
     state = playReducer(state, { type: 'tap' });
     state = playReducer(state, { type: 'close' });
@@ -49,7 +51,7 @@ describe('animal village event engine', () => {
   });
   it('clamps invalid random input and keeps deterministic selection', () => {
     expect(selectPlay('rabbit', [], NaN)).toBe('bubbles');
-    expect(selectPlay('rabbit', [], 100)).toBe('peek');
+    expect(selectPlay('rabbit', [], 100)).toBe('gift');
     expect(selectPlay('rabbit', [], -100)).toBe('bubbles');
   });
 });

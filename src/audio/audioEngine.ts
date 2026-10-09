@@ -19,7 +19,7 @@ export function unlockAudio() {
     void context.resume().catch(() => {});
   } catch { /* Silent play works without Web Audio. */ }
 }
-const melodies = { tap: [660], enter: [440, 550], success: [660, 880], joy: [784, 1046], finish: [523, 659, 784, 1046], bubbles: [1175], pet: [392, 494], hop: [330, 660], clap: [740, 740], roll: [523, 440, 330], peek: [659, 988] };
+const melodies = { tap: [660], enter: [440, 550], success: [660, 880], joy: [784, 1046], finish: [523, 659, 784, 1046], bubbles: [1175], pet: [392, 494], hop: [330, 660], clap: [740, 740], roll: [523, 440, 330], peek: [659, 988], wash: [587, 784], balloons: [698, 880], bedtime: [523, 392], gift: [659, 880] };
 export function sound(kind: keyof typeof melodies, muted: boolean) {
   if (muted || !context || context.state !== 'running') return;
   try {

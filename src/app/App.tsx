@@ -5,12 +5,14 @@ import { FoodArt } from '../assets/foods';
 import { PlayArt } from '../assets/play';
 import { LeafMark, MusicMark, PlayMark, ProgressFlowers, SoundMark } from '../components/Decor';
 import { PlayEvent } from '../components/PlayEvent';
+import { StickerBook, StickerButton } from '../components/StickerBook';
 import { MOTIONS, nextIdleMotion, type IdleMotion } from '../game/idleMotions';
 import { PLAY_BY_ID, initialPlayState, playReducer } from '../game/playEvents';
 import { ANIMALS, FOOD_NAMES, PHASE_MS, ROUNDS, makeLayouts, type FoodId } from '../game/data';
 import { initialState, reducer } from '../game/reducer';
 import { useFeedingGesture } from '../game/useFeedingGesture';
 import { readMuted, readMusicMuted, saveMuted, saveMusicMuted, sound, unlockAudio } from '../audio/audioEngine';
+import { giveSticker, readStickerBook, type StickerGift } from '../game/stickers';
 
 type Flight = { food: FoodId; fromX: number; fromY: number; toX: number; toY: number };
 export function App() {
@@ -21,6 +23,9 @@ export function App() {
   const [layouts, setLayouts] = useState(makeLayouts);
   const [muted, setMuted] = useState(readMuted);
   const [musicMuted, setMusicMuted] = useState(readMusicMuted);
+  const [stickers, setStickers] = useState(readStickerBook);
+  const [albumOpen, setAlbumOpen] = useState(false);
+  const [lastGift, setLastGift] = useState<StickerGift | null>(null);
   const [flight, setFlight] = useState<Flight | null>(null);
   const [offlineReady, setOfflineReady] = useState(false);
   const [updatePending, setUpdatePending] = useState(false);
@@ -95,12 +100,12 @@ export function App() {
     };
     const onVisibility = () => {
       clearTimeout(timer);
-      if (!document.hidden) { lastInteractionAt.current = Date.now(); schedule(); }
+      if (!document.hidden) { lastInteractionAt.current = Date.now(); if (!albumOpen) schedule(); }
     };
     document.addEventListener('visibilitychange', onVisibility);
-    if (!document.hidden) schedule();
+    if (!document.hidden && !albumOpen) schedule();
     return () => { clearTimeout(timer); document.removeEventListener('visibilitychange', onVisibility); };
-  }, [animalId, state.phase, play.mode]);
+  }, [animalId, state.phase, play.mode, albumOpen]);
   useEffect(() => {
     if (state.phase === 'ready' && play.mode !== 'idle') return;
     if (state.phase === 'ready') {
@@ -148,9 +153,20 @@ export function App() {
   }
   function tapPlay() {
     if (play.mode !== 'active' || !play.id) return;
+    lastInteractionAt.current = Date.now();
     sound(play.id, muted);
-    if (play.steps + 1 >= PLAY_BY_ID[play.id].taps) sound('joy', muted);
+    if (play.steps + 1 >= PLAY_BY_ID[play.id].taps) {
+      sound('joy', muted);
+      if (play.id === 'gift') {
+        const gift = giveSticker();
+        setLastGift(gift); setStickers(gift.book);
+      }
+    }
     playDispatch({ type: 'tap' });
+  }
+  function openAlbum() {
+    lastInteractionAt.current = Date.now();
+    setAlbumOpen(true);
   }
   function start(restart = false, continuePlay = false) {
     unlockAudio();
@@ -181,12 +197,13 @@ export function App() {
     if (state.phase === 'feeding' || state.phase === 'celebrating') dispatch({ type: 'next' });
   }
   const mood = state.phase === 'feeding' ? 'chewing' : state.phase === 'celebrating' ? 'delighted' : hint ? 'curious' : 'idle';
-  const playMotion = play.mode !== 'idle' && play.steps > 0 ? play.id : null;
+  const playMotion = play.mode !== 'idle' ? play.id : null;
 
   return <main className={`restaurant screen-${state.phase}`} data-phase={state.phase} data-round={state.roundIndex} onPointerDown={() => { lastInteractionAt.current = Date.now(); skipFeedback(); }} onKeyDown={() => { lastInteractionAt.current = Date.now(); }}>
     <header className="topbar">
       <div className="brand"><LeafMark /><div><span>세연이의</span><strong>냠냠 동물식당</strong></div></div>
       <div className="sound-controls" role="group" aria-label="소리 설정">
+        <StickerButton count={stickers.ids.length} onClick={openAlbum} />
         <button className="sound-button" aria-label={muted ? '효과음과 배경음악 켜기' : '효과음과 배경음악 끄기'} aria-pressed={muted} title="효과음과 배경음악" onPointerDown={event => event.stopPropagation()} onClick={toggleSound}><SoundMark muted={muted} /></button>
         <button className="sound-button music-button" aria-label={musicMuted ? '배경음악 켜기' : '배경음악 끄기'} aria-pressed={musicMuted} title="배경음악만" onPointerDown={event => event.stopPropagation()} onClick={toggleMusic}><MusicMark muted={musicMuted} /></button>
       </div>
@@ -211,10 +228,10 @@ export function App() {
       <div className={`stage ${state.phase === 'transitioning' ? 'entering' : ''}`}>
         <div className="scene-leaves left" aria-hidden="true"><LeafMark /></div><div className="scene-leaves right" aria-hidden="true"><LeafMark /></div>
         <div className={`animal-zone ${state.phase === 'dragging' ? 'drop-active' : ''}`} data-testid="drop-zone" ref={zone} aria-label={`${animal.name}에게 밥 주는 곳`}>
-          <AnimalArt key={`${animalId}-${play.id}-${play.steps}-${idleMotion ?? ''}`} id={animalId} mood={play.mode === 'idle' ? mood : 'idle'} motion={state.phase === 'ready' && play.mode === 'idle' && idleMotion && MOTIONS[animalId].includes(idleMotion) ? idleMotion : null} play={playMotion} />
+          <AnimalArt key={`${animalId}-${play.id}-${play.steps}-${idleMotion ?? ''}`} id={animalId} mood={play.mode === 'idle' ? mood : play.id === 'bedtime' && play.steps === 1 ? 'sleepy' : play.id === 'wash' && play.mode === 'reward' ? 'delighted' : 'idle'} motion={state.phase === 'ready' && play.mode === 'idle' && idleMotion && MOTIONS[animalId].includes(idleMotion) ? idleMotion : null} play={playMotion} playStep={play.steps} onFaceWash={tapPlay} />
           {state.phase === 'celebrating' && <div className="joy-sparkles" aria-hidden="true"><span>✦</span><span>✧</span><span>✦</span></div>}
         </div>
-        {state.phase === 'ready' && <PlayEvent state={play} onTap={tapPlay} onClose={() => playDispatch({ type: 'close' })} />}
+        {state.phase === 'ready' && <PlayEvent state={play} onTap={tapPlay} onClose={() => playDispatch({ type: 'close' })} onAlbum={openAlbum} gift={lastGift} />}
         <div className="ground" aria-hidden="true" />
       </div>
       <ProgressFlowers count={state.progressFlowers} />
@@ -243,6 +260,7 @@ export function App() {
     {gesture.ghost && <div className={`drag-ghost ${gesture.ghost.returning ? 'returning' : ''}`} style={{ left: gesture.ghost.x, top: gesture.ghost.y - 42 }} aria-hidden="true"><FoodArt id={gesture.ghost.food} /></div>}
     {flight && state.phase === 'feeding' && <div className="flying-food" key={`${state.roundIndex}-${flight.food}`} style={{ '--from-x': `${flight.fromX}px`, '--from-y': `${flight.fromY}px`, '--to-x': `${flight.toX}px`, '--to-y': `${flight.toY}px` } as CSSProperties} aria-hidden="true"><FoodArt id={flight.food} /></div>}
     <audio ref={music} src={`${import.meta.env.BASE_URL}audio/kickoff-bounce.mp3`} loop preload="none" aria-hidden="true" />
+    {albumOpen && <StickerBook ids={stickers.ids} onClose={() => setAlbumOpen(false)} />}
     <div className="rotate-overlay" role="status"><div className="rotate-phone" aria-hidden="true" /><strong>세로로 세워 주세요</strong><span>친구들이 기다리고 있어요</span></div>
   </main>;
 }

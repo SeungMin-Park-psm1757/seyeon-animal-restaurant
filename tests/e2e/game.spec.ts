@@ -1,7 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 
 const sequence = ['carrot', 'banana', 'bamboo', 'carrot', 'banana', 'bamboo'];
-const screenshots = 'qa/screenshots';
+const screenshots = 'qa/v21-after/screenshots';
 const game = (page: Page) => page.locator('main');
 const card = (page: Page, food: string) => page.locator(`[data-food="${food}"]`);
 async function start(page: Page) {
@@ -298,6 +298,15 @@ test('cached app reloads offline and completes without network or external reque
   await expect(page.getByRole('button', { name: '놀이 시작' })).toBeVisible();
   await page.getByRole('button', { name: '놀이 시작' }).tap(); await complete(page);
   await page.screenshot({ path: `${screenshots}/390-offline-finished.png` });
+  await page.getByRole('button', { name: '계속 놀기' }).tap();
+  await page.evaluate(() => { Math.random = () => .9; });
+  await page.getByRole('button', { name: '동물과 놀기' }).tap();
+  await expect(page.locator('[data-play-event]')).toHaveAttribute('data-play-event', 'gift');
+  await page.getByRole('button', { name: '선물상자 열기' }).tap();
+  await page.getByRole('button', { name: '선물상자 열기' }).tap();
+  await expect(page.locator('.gift-reward strong')).toHaveText('새 스티커야!');
+  await page.waitForTimeout(1300); await page.reload();
+  await expect(page.getByRole('button', { name: '스티커 앨범, 1개' })).toBeVisible();
   expect(external).toEqual([]); await context.setOffline(false);
 });
 test('reduced motion, keyboard buttons and landscape prompt', async ({ page }) => {
