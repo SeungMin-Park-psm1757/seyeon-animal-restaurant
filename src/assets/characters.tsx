@@ -1,10 +1,17 @@
 import type { AnimalId } from '../game/data';
+import type { IdleMotion } from '../game/idleMotions';
+import type { PlayId } from '../game/playEvents';
 
-export function AnimalArt({ id, mood = 'idle' }: { id: AnimalId; mood?: 'idle' | 'curious' | 'chewing' | 'delighted' }) {
+export function AnimalArt({ id, mood = 'idle', motion, play }: {
+  id: AnimalId;
+  mood?: 'idle' | 'curious' | 'chewing' | 'delighted';
+  motion?: IdleMotion | null;
+  play?: PlayId | null;
+}) {
   const rabbit = id === 'rabbit';
   const monkey = id === 'monkey';
   const fur = rabbit ? '#fffdf7' : monkey ? '#c99673' : '#fffdf7';
-  return <svg className={`animal-art animal-${id} mood-${mood}`} data-animal={id} viewBox="0 0 512 512" aria-hidden="true" fill="none" stroke="#755c63" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round">
+  return <svg className={`animal-art animal-${id} mood-${mood}${motion ? ` motion-${motion}` : ''}${play ? ` play-${play}` : ''}`} data-animal={id} viewBox="0 0 512 512" aria-hidden="true" fill="none" stroke="#755c63" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round">
     <ellipse className="animal-shadow" cx="256" cy="467" rx="115" ry="15" fill="#755c63" opacity=".12" stroke="none" />
     <g className="animal-body">
       {monkey && <path className="tail" d="M338 389c106 17 118-69 79-83-25-9-45 18-23 32" stroke="#a6755b" strokeWidth="24" />}
