@@ -1,0 +1,13 @@
+{
+  "testedAt": "2026-10-09T07:59:35.652Z",
+  "url": "https://seungmin-park-psm1757.github.io/seyeon-animal-restaurant/",
+  "commit": "dfd339a996e02d2d162d9cdb0aad75fc65211f88",
+  "status": "PASS",
+  "serviceWorkerScope": "https://seungmin-park-psm1757.github.io/seyeon-animal-restaurant/",
+  "titleFont": "22px",
+  "onlineSixFeeds": true,
+  "restart": true,
+  "offlineReloadAndSixFeeds": true,
+  "desktopStart": true,
+  "errors": []
+}

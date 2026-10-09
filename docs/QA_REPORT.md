@@ -70,6 +70,17 @@
 - 실제 Android 기기에서의 홈 화면 설치, 주소창/홈 제스처 safe area, 시스템 오디오의 청감·볼륨, 앱 전환 하드웨어 이벤트는 NOT VERIFIED. 브라우저 에뮬레이션과 Web Audio 호출을 검증했다.
 - 실제 3세 플레이, 목표 2–4분의 지속 시간, 반복 놀이의 즐거움은 NOT VERIFIED.
 - ChatGPT Web/C2C 및 Game Studio가 이 세션에서 호출 불가하여 독립 리뷰 에이전트/Playwright로 대체했다.
-- 사용자가 GitHub 연동과 게임 링크 제공을 요청하여 독립 공개 저장소·GitHub Pages 배포를 진행한다. 실제 배포 확인 결과는 아래에 별도로 기록한다. 인터넷 없이 첫 설치는 불가능하며, 미리 캐시한 localhost/HTTPS 환경에서 오프라인 놀이가 가능하다.
+- 사용자가 GitHub 연동과 게임 링크 제공을 요청하여 독립 공개 저장소·GitHub Pages 배포를 완료했다. 인터넷 없이 첫 설치는 불가능하며, 미리 캐시한 localhost/HTTPS 환경에서 오프라인 놀이가 가능하다.
+
+## GitHub / 공개 배포 검증
+
+- 저장소: [SeungMin-Park-psm1757/seyeon-animal-restaurant](https://github.com/SeungMin-Park-psm1757/seyeon-animal-restaurant), 공개, 기본 브랜치 `main`.
+- 게임: [세연이의 냠냠 동물식당](https://seungmin-park-psm1757.github.io/seyeon-animal-restaurant/), HTTPS.
+- 배포 버전: `dfd339a996e02d2d162d9cdb0aad75fc65211f88`. 공개 `build-info.json`과 일치했다. 이 문서·배포 검증 스크립트·증거 추가 커밋은 게임 코드를 변경하지 않는다.
+- [GitHub Actions 실행 37901709219](https://github.com/SeungMin-Park-psm1757/seyeon-animal-restaurant/actions/runs/37901709219): Linux에서도 단위 10개, E2E 16개 통과 후 Pages 배포 성공.
+- 2026-10-09 16:59 KST 공개 주소에서 Chromium 390×844: HTTP 200, 상단 제목 22px, 온라인 6회·재시작·오프라인 reload 후 6회·합동 축하 통과. Service Worker scope는 게임의 하위 경로와 일치, 모바일 console error/pageerror 없음.
+- 공개 주소의 1280×900 PC에서 회전 안내 없이 시작 통과. Codex 내장 브라우저에서도 공개 시작 화면과 오프라인 준비 안내를 확인했다.
+- 근거: [`qa/live-result.json`](../qa/live-result.json), [모바일 놀이](../qa/screenshots/live-390-play.png), [오프라인 완료](../qa/screenshots/live-390-offline-finished.png), [PC 놀이](../qa/screenshots/live-desktop-play.png).
+- 재현: `node qa/verify-live.mjs https://seungmin-park-psm1757.github.io/seyeon-animal-restaurant/ dfd339a996e02d2d162d9cdb0aad75fc65211f88`.
 
 재현: `npm run check`. 수동 확인: `npm run build` → `npm run preview` → `http://127.0.0.1:4173` → 시작 → 말풍선 음식 탭/드래그 → 꽃 6송이 → 다시 놀기.
