@@ -48,6 +48,30 @@ test('party offers free continuation without a forced end', async ({ page }) => 
   await expect(page.locator('[data-play-event]')).toBeVisible();
 });
 
+test('real child interactions postpone the 20-second surprise invitation', async ({ page }) => {
+  await page.clock.install();
+  await start(page);
+  await page.clock.fastForward(18000);
+  // The child is still playing, even if the selected food is not correct.
+  await page.locator('[data-food="banana"]').tap();
+  await page.clock.fastForward(3000);
+  await expect(page.locator('[data-play-event]')).toHaveCount(0);
+  await expect(page.locator('main')).toHaveAttribute('data-phase', 'ready');
+  await page.clock.fastForward(18000);
+  await expect(page.locator('[data-play-event]')).toHaveAttribute('data-play-mode', 'active');
+});
+
+test('feeding idle hint timer stays suspended during an active mini-game', async ({ page }) => {
+  await page.clock.install();
+  await start(page);
+  await page.getByRole('button', { name: '동물과 놀기' }).tap();
+  await page.clock.fastForward(9000);
+  await expect(page.locator('[data-play-event]')).toHaveAttribute('data-play-mode', 'active');
+  await expect(page.locator('.food-card.hint')).toHaveCount(0);
+  await page.getByRole('button', { name: '놀이 그만하고 밥 주기' }).tap();
+  await expect(page.locator('.food-card.hint')).toHaveCount(0);
+});
+
 test('the touched bubble disappears, cancel resets bubbles, keyboard closes play', async ({ page }) => {
   await start(page);
   await page.evaluate(() => { Math.random = () => 0; });
