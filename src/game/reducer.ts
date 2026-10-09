@@ -6,7 +6,7 @@ export type State = {
   selectedFoodId: FoodId | null; mistakesInRound: number; idleHint: boolean;
 };
 export type Action =
-  | { type: 'start' | 'drag' | 'cancel' | 'idle' | 'chewed' | 'next' | 'arrived' | 'restart' }
+  | { type: 'start' | 'drag' | 'cancel' | 'idle' | 'activity' | 'chewed' | 'next' | 'arrived' | 'restart' }
   | { type: 'choose'; food: FoodId };
 export const initialState: State = {
   phase: 'welcome', roundIndex: 0, progressFlowers: 0,
@@ -19,6 +19,7 @@ export function reducer(state: State, action: Action): State {
     case 'drag': return state.phase === 'ready' ? { ...state, phase: 'dragging', idleHint: false } : state;
     case 'cancel': return state.phase === 'dragging' ? { ...state, phase: 'ready' } : state;
     case 'idle': return state.phase === 'ready' ? { ...state, idleHint: true } : state;
+    case 'activity': return state.phase === 'ready' && state.idleHint ? { ...state, idleHint: false } : state;
     case 'choose': {
       if (state.phase !== 'ready' && state.phase !== 'dragging') return state;
       if (ANIMALS[ROUNDS[state.roundIndex]].food !== action.food) {
