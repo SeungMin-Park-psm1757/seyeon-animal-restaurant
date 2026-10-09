@@ -6,7 +6,7 @@ body { background: #dbece2; color: var(--ink); font-family: 'Malgun Gothic', 'Ap
 button { font: inherit; color: inherit; cursor: pointer; border: 0; touch-action: manipulation; }
 button:focus-visible { outline: 4px solid #79699b; outline-offset: 3px; }
 svg { display: block; width: 100%; height: 100%; }
-.restaurant { width: min(100%, 560px); height: 100svh; height: 100dvh; margin: auto; overflow: hidden; position: relative; display: flex; flex-direction: column; padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); background: var(--cream); isolation: isolate; }
+.restaurant { width: min(100%, 560px); height: 100svh; height: 100dvh; margin: auto; overflow: clip; position: relative; display: flex; flex-direction: column; padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); background: var(--cream); isolation: isolate; }
 .topbar { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; flex-shrink: 0; z-index: 2; }
 .brand { display: flex; align-items: center; gap: 8px; }
 .brand > svg { width: 40px; height: 40px; }
@@ -39,7 +39,7 @@ h1 { margin: 8px 0; font-size: clamp(34px, 9vw, 48px); line-height: 1.2; font-we
 .mini-leaf { width: 24px; height: 24px; }
 .play-screen { min-height: 0; flex: 1; display: grid; grid-template-rows: auto minmax(120px, 1fr) 86px auto; touch-action: none; user-select: none; -webkit-user-select: none; background: radial-gradient(ellipse at 50% 30%, #fffcf2 20%, #eef4e3 80%); }
 .order-area { position: relative; display: flex; flex-direction: column; align-items: center; padding-top: 8px; z-index: 2; }
-.friend-caption { position: absolute; top: 50%; right: calc(50% + 84px); transform: translateY(-50%); width: clamp(68px, 20vw, 112px); font-size: 20px; line-height: 1.35; font-weight: 800; display: flex; gap: 8px; align-items: center; }
+.friend-caption { position: absolute; top: 50%; right: calc(50% + 84px); transform: translateY(-50%); width: clamp(68px, 20vw, 112px); font-size: 20px; line-height: 1.35; font-weight: 800; display: block; text-align: center; }
 .friend-dot { width: 12px; height: 12px; flex-shrink: 0; border: 1px solid #b2a293; border-radius: 50%; }
 .order-bubble { border: 2px solid #ddcec1; border-radius: 25px; width: 140px; height: 116px; padding: 6px 12px; display: flex; flex-direction: column; align-items: center; gap: 4px; background: #fffefa; text-align: center; position: relative; box-shadow: 0 4px 0 #eadfd1; }
 .order-bubble::after { content: ''; position: absolute; bottom: -10px; left: calc(50% - 9px); width: 17px; height: 17px; border-right: 2px solid #ddcec1; border-bottom: 2px solid #ddcec1; background: #fffefa; transform: rotate(45deg); }

@@ -1,82 +1,121 @@
-/* Tiny-play overlay: existing animal and food graphics keep their original dimensions. */
-.order-area .play-launch {
-  position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
-  min-width: 68px; width: 72px; min-height: 72px; border: 2px solid #dcbbd3;
-  background: #fff0f6; border-radius: 24px; color: #8c5d82;
-  z-index: 3; display: grid; place-content: center; gap: 0;
-  box-shadow: 0 4px 0 #e8cfda;
-}
-.play-launch .play-launch-icon { font-size: 29px; line-height: 1; }
-.play-launch strong { font-size: 16px; white-space: nowrap; line-height: 1.25; }
+/* Play presentation shares the original feeding stage and character scale. */
+.order-area .play-launch { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); width: 68px; min-height: 72px; border: 2px solid #dcbbd3; background: #fff0f6; border-radius: 24px; color: #805a76; z-index: 3; display: grid; justify-items: center; gap: 1px; padding: 4px; box-shadow: 0 4px 0 #e8cfda; }
+.play-launch-icon { width: 35px; height: 35px; }
+.play-launch strong { font-size: 16px; line-height: 1.25; white-space: nowrap; }
 .play-launch.suggest { animation: play-nudge 3.4s ease-in-out infinite; }
-.play-launch:disabled { opacity: .6; }
+.play-launch:disabled { opacity: .65; }
+.friend-caption > span:not(.friend-dot) { display: block; white-space: nowrap; }
+.friend-caption .friend-dot { position: absolute; top: -18px; left: calc(50% - 6px); }
+.has-event .order-bubble { visibility: hidden; }
 .mini-event { position: absolute; inset: 0; z-index: 4; pointer-events: none; }
 .mini-event button { pointer-events: auto; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
-.mini-caption {
-  position: absolute; z-index: 5; left: 50%; top: 0; transform: translateX(-50%);
-  display: flex; flex-direction: column; align-items: center; gap: 2px;
-  min-width: 160px; padding: 7px 13px; background: #fffdf5f2; border: 2px solid #e9d4b6;
-  border-radius: 20px; color: #7f6472; box-shadow: 0 3px 0 #e9dfcb; text-align: center;
-}
-.mini-caption strong { font-size: 18px; line-height: 1.2; white-space: nowrap; }
-.mini-caption span { display: flex; gap: 4px; font-size: 16px; color: #c8b7b0; }
-.mini-caption i { font-style: normal; }.mini-caption i.done { color: #e6a9b6; }
-.mini-close { position: absolute; top: 5px; right: 8px; width: 45px; height: 45px; border-radius: 50%; background: #fffdf8; border: 2px solid #dbcbb7; font-size: 22px; z-index: 6; }
-.mini-target {
-  position: absolute; bottom: 4px; right: 9px; z-index: 5;
-  width: 100px; height: 78px; padding: 6px; border-radius: 25px;
-  background: #fff2d9f5; border: 2px solid #dcbfa6;
-  display: grid; place-content: center; gap: 1px; box-shadow: 0 5px 0 #e5cbb2;
-}
-.mini-target span { font-size: 29px; line-height: 1; }
-.mini-target strong { font-size: 16px; line-height: 1.2; white-space: nowrap; }
-.mini-target:active { transform: scale(.94); }
-.target-pet { width: 54%; max-width: 200px; height: 64%; left: 23%; right: auto; bottom: 3%; background: #fff8e51a; border: 3px dashed #e1b8d0; box-shadow: none; display: flex; align-items: flex-end; justify-content: center; }
-.target-pet span { font-size: 28px; }.target-pet strong { background: #fff9ef; border-radius: 12px; padding: 2px 5px; }
-.target-peek { left: 17%; right: auto; bottom: 5%; width: 66%; height: 77%; background: #d7ebc3eb; border-color: #9cbd8b; }
-.target-peek span { font-size: clamp(64px, 20vw, 108px); line-height: 1; }
-.target-peek strong { background: #fffaf1; border-radius: 10px; padding: 3px 5px; }
-.mini-bubbles { position: absolute; inset: 14% 1% 0; z-index: 5; }
-.mini-bubble {
-  position: absolute; width: 72px; height: 72px; border-radius: 50%;
-  background: radial-gradient(circle at 28% 27%, #fff 4%, #e4f7fbc9 20%, #b7d9edb0 64%, #efd9fac4 100%);
-  border: 2px solid #b9cde3; box-shadow: inset -6px -8px 13px #99bece45, 0 3px 8px #b1b8bf61;
-  color: #fff; font-size: 28px; animation: bubble-float 2s ease-in-out infinite alternate;
-}
-.bubble-0 { top: 12%; left: 1%; }.bubble-1 { top: 18%; right: 2%; animation-delay: -.8s; }.bubble-2 { bottom: 6%; left: 6%; animation-delay: -1.4s; }
-.mini-reward { position: absolute; top: 35%; left: 50%; transform: translate(-50%, -50%); display: grid; justify-items: center; width: 80%; font-weight: 900; pointer-events: none; animation: reward-pop .5s ease-out both; }
-.mini-reward span { font-size: 37px; white-space: nowrap; }.mini-reward strong { font-size: 31px; color: #d88e9f; text-shadow: 0 2px #fff; }
-/* Character-specific partial motion. */
-.animal-art.motion-sniff .animal-head { animation: sniff .75s ease-in-out 2; }
-.animal-art.motion-ears .ear-left { animation: perk-left .45s 2; }
-.animal-art.motion-ears .ear-right { animation: perk-right .45s 2; }
-.animal-art.motion-tilt .animal-head { animation: tilt .9s ease-in-out; }
-.animal-art.motion-wave .hand-left { animation: wave .85s ease-in-out; }
-.animal-art.motion-cheeks .cheek { animation: cheek-puff 1s ease; transform-origin: center; transform-box: fill-box; }
-.animal-art.motion-tail .tail { animation: tail-wag .8s ease 2; transform-origin: 340px 390px; }
-.animal-art.motion-yawn .mouth { animation: yawn .9s ease; transform-origin: 256px 281px; }
-.animal-art.motion-belly .animal-body { animation: panda-rock .6s 2; }
-.animal-art.motion-sway .animal-body { animation: sway .7s 2; }
-.animal-art.play-hop .animal-body { animation: hop .45s ease-in-out; }
-.animal-art.play-hop .ear-left { animation: perk-left .45s; }.animal-art.play-hop .ear-right { animation: perk-right .45s; }
-.animal-art.play-clap .hand-left { animation: clap-left .5s; }.animal-art.play-clap .hand-right { animation: clap-right .5s; }
-.animal-art.play-roll .animal-body { animation: gentle-roll .8s ease-in-out; }
-.animal-art.play-pet .eyes { animation: none; transform: scaleY(.27); }
-.animal-art.play-pet .animal-head { animation: tilt .7s ease-in-out; }
-.animal-art.play-peek .animal-head { animation: tilt .55s ease-in-out; }
-.animal-art.play-bubbles .animal-head { animation: tilt .65s ease-in-out; }
+.mini-caption { position: absolute; z-index: 5; left: 50%; top: -116px; transform: translateX(-50%); display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 3px; width: 140px; height: 110px; padding: 5px; background: #fffdf5; border: 2px solid #dcc5d2; border-radius: 25px; color: #795e6c; box-shadow: 0 4px 0 #eadfd1; text-align: center; }
+.mini-caption > svg { width: 37px; height: 37px; flex-shrink: 0; }
+.mini-caption strong { font-size: 16px; line-height: 1.3; }
+.mini-caption span { display: flex; gap: 8px; font-size: 18px; line-height: 1; color: #baa9a1; }
+.mini-caption i { font-style: normal; }.mini-caption i.done { color: #bb748b; }
+.mini-close { position: absolute; top: 6px; right: 8px; width: 46px; height: 46px; border-radius: 50%; background: #fffdf8; border: 2px solid #dbcbb7; font-size: 22px; z-index: 6; box-shadow: 0 3px 0 #e9dfcb; }
+.mini-target { position: absolute; bottom: 6px; right: 8px; z-index: 5; width: 92px; height: 82px; padding: 5px; border-radius: 24px; background: #fff2d9f5; border: 2px solid #dcbfa6; display: grid; justify-items: center; align-content: center; gap: 1px; box-shadow: 0 4px 0 #e5cbb2; }
+.mini-target > .play-art { width: 40px; height: 40px; }
+.mini-target strong { font-size: 17px; line-height: 1.3; white-space: nowrap; }
+.mini-target:active:not(:disabled) { scale: .95; }
+.target-pet { width: min(54%, 200px); height: 73%; left: 50%; right: auto; bottom: 0; transform: translateX(-50%); background: transparent; border: 0; box-shadow: none; display: flex; flex-direction: row; align-items: flex-end; justify-content: center; gap: 3px; }
+.target-pet > .play-art { width: 28px; height: 28px; }
+.target-pet strong { background: #fff5f1; border: 1px solid #e8c7ce; border-radius: 14px; padding: 3px 8px; }
+.target-peek { left: 50%; top: 50%; right: auto; bottom: auto; transform: translate(-50%, -50%); width: min(72%, 355px); height: 100%; max-height: 385px; background: transparent; border: 0; padding: 0; box-shadow: none; display: block; }
+.target-peek:active:not(:disabled) { scale: 1; }
+.target-peek strong { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); border: 2px solid #c4d3ae; background: #fff9ee; border-radius: 18px; padding: 3px 12px; }
+.peek-garden { overflow: visible; }
+.peek-half { transform-origin: 256px 480px; }
+.mini-mode-reward .peek-left { animation: peek-left .65s cubic-bezier(.2,.8,.3,1) both; }
+.mini-mode-reward .peek-right { animation: peek-right .65s cubic-bezier(.2,.8,.3,1) both; }
+.mini-mode-reward .garden-flower { animation: garden-bloom .65s ease both; }
+.mini-bubbles { position: absolute; inset: 5% 1% 0; z-index: 5; }
+.mini-bubble { position: absolute; width: 82px; height: 82px; border-radius: 50%; border: 0; background: transparent; padding: 0; filter: drop-shadow(0 3px 3px #8caaa326); }
+.mini-bubble .bubble-art { animation: bubble-drift 3s ease-in-out infinite; animation-delay: inherit; }
+.bubble-0 { top: 16%; left: 0; }.bubble-1 { top: 32%; right: 0; animation-delay: -.9s; }.bubble-2 { bottom: 1%; left: 4%; animation-delay: -1.8s; }
+.play-burst { position: absolute; width: 0; height: 0; pointer-events: none; z-index: 7; }
+.play-burst i { position: absolute; width: 21px; height: 21px; margin: -10px; animation: play-particle .75s cubic-bezier(.15,.6,.3,1) both; }
+.burst-bubbles i { width: 15px; height: 15px; }
+.burst-hop i { width: 20px; height: 10px; background: #fff4da; border-radius: 50%; }.burst-hop svg { display: none; }
+.burst-roll i { width: 14px; height: 22px; background: #c2d9ad; border-radius: 80% 10% 80% 10%; }.burst-roll svg { display: none; }
+.mini-reward { position: absolute; bottom: 14%; left: 50%; transform: translateX(-50%); display: grid; justify-items: center; pointer-events: none; z-index: 6; animation: reward-pop .45s ease-out both; }
+.mini-reward span { display: flex; gap: 7px; height: 28px; }.mini-reward span svg { width: 28px; }
+.mini-reward strong { font-size: 25px; line-height: 1.3; color: #a96980; background: #fff8eee8; padding: 2px 14px; border-radius: 18px; }
+.mini-event-peek .mini-reward { bottom: 1%; }
+.mini-mode-reward .target-peek strong { visibility: hidden; }
+/* Every autonomous cue settles before the existing one-second engine cutoff. */
+.animal-art .nose { transform-origin: 256px 254px; }
+.animal-art .belly, .animal-art .apron { transform-origin: 256px 405px; }
+.animal-art.motion-sniff .animal-head { animation: sniff .92s ease-in-out; }
+.animal-art.motion-sniff .nose { animation: nose-twitch .3s 3; }
+.animal-art.motion-sniff .ear-right { animation: ear-follow .8s ease-in-out; }
+.animal-art.motion-ears .ear-left { animation: ear-perk-left .86s ease-in-out; }
+.animal-art.motion-ears .ear-right { animation: ear-perk-right .86s .07s ease-in-out; }
+.animal-art.motion-tilt .animal-head { animation: head-look .92s ease-in-out; }
+.animal-art.motion-wave .hand-left { animation: friendly-wave .94s ease-in-out; }
+.animal-art.motion-wave .animal-head { animation: head-look .94s ease-in-out; }
+.animal-art.motion-cheeks .cheek { animation: cheek-puff .92s ease; transform-origin: center; transform-box: fill-box; }
+.animal-art.motion-tail .tail { animation: tail-curl .92s ease-in-out; transform-origin: 340px 390px; }
+.animal-art.motion-yawn .mouth { animation: yawn .92s ease; transform-origin: 256px 281px; }
+.animal-art.motion-yawn .eyes { animation: sleepy-eyes .92s ease; }
+.animal-art.motion-yawn .hand-right { animation: yawn-hand .92s ease; }
+.animal-art.motion-belly .belly, .animal-art.motion-belly .apron { animation: belly-breathe .92s ease-in-out; }
+.animal-art.motion-belly .hand-right { animation: belly-pat .92s ease; }
+.animal-art.motion-sway .animal-body { animation: soft-sway .92s ease-in-out; }
+.animal-art.motion-sway .animal-head { animation: head-follow .92s ease-in-out; }
+.animal-art.play-hop .animal-body { animation: soft-hop .7s ease-in-out; }
+.animal-art.play-hop .ear-left { animation: ear-perk-left .7s ease-in-out; }.animal-art.play-hop .ear-right { animation: ear-perk-right .7s .05s ease-in-out; }
+.animal-art.play-hop .animal-shadow { animation: hop-shadow .7s ease; transform-origin: 256px 467px; }
+.animal-art.play-clap .hand-left { animation: soft-clap-left .65s ease-in-out; }.animal-art.play-clap .hand-right { animation: soft-clap-right .65s ease-in-out; }
+.animal-art.play-clap .animal-head { animation: clap-nod .65s ease; }.animal-art.play-clap .tail { animation: tail-curl .65s ease; transform-origin: 340px 390px; }
+.animal-art.play-roll .animal-body { animation: gentle-roll .85s ease-in-out; }
+.animal-art.play-roll .hand-left { animation: roll-hand .85s ease; }.animal-art.play-roll .belly { animation: belly-breathe .85s ease; }
+.animal-art.play-pet .eyes { animation: content-eyes .85s ease both; }.animal-art.play-pet .animal-head { animation: head-look .8s ease; }
+.animal-art.play-pet .cheek { animation: cheek-puff .8s ease; transform-box: fill-box; transform-origin: center; }
+.animal-art.play-peek .animal-head { animation: peek-look .8s ease; }.animal-art.play-peek .hand-left { animation: friendly-wave .9s ease; }
+.animal-art.play-bubbles .animal-head { animation: head-look .7s ease; }.animal-art.play-bubbles .hand-right { animation: reach-bubble .7s ease; }
 .finish-action .finish-buttons { display: flex; gap: 14px; justify-content: center; align-items: center; }
 .finish-action .continue-play { background: #bfe0b5; border-color: #91bb8c; box-shadow: 0 7px 0 #9ebf98, inset 0 3px 0 #e2f3dd; }
-.finish-action .continue-play svg { width: 100%; height: 100%; }
-@keyframes play-nudge { 0%, 80%, 100% { transform: translateY(-50%) rotate(0); } 85%, 95% { transform: translateY(-50%) rotate(-7deg); } 90% { transform: translateY(-50%) rotate(7deg); } }
-@keyframes bubble-float { to { transform: translateY(-10px); } }
-@keyframes reward-pop { from { opacity: 0; transform: translate(-50%, -50%) scale(.65); } to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
-@keyframes sniff { 50% { transform: translateY(5px) scale(.98); } }
-@keyframes tilt { 40% { transform: rotate(7deg); } 75% { transform: rotate(-4deg); } }
-@keyframes cheek-puff { 50% { transform: scale(1.35); } }
-@keyframes tail-wag { 50% { transform: rotate(12deg); } }
-@keyframes yawn { 50% { transform: scale(1.2, 1.9); } }
-@keyframes gentle-roll { 0%,100% { transform: rotate(0); } 35% { transform: rotate(-13deg) translateX(-12px); } 70% { transform: rotate(13deg) translateX(12px); } }
-@media (max-width: 360px) { .order-area .play-launch { width: 64px; min-width: 64px; height: 68px; min-height: 68px; right: 4px; }.play-launch strong { font-size: 15px; } .mini-caption strong { font-size: 16px; } .mini-bubble { width: 62px; height: 62px; } .finish-action .finish-buttons { gap: 7px; }.finish-action .primary-button { width: 84px; height: 84px; padding: 18px; } }
-@media (max-height: 680px) { .mini-caption { padding: 3px 11px; }.mini-caption strong { font-size: 15px; }.mini-target { height: 64px; width: 90px; }.target-pet { height: 64%; width: 53%; }.target-peek { height: 72%; width: 66%; }.mini-bubble { width: 58px; height: 58px; } }
-@media (prefers-reduced-motion: reduce) { .mini-bubble, .play-launch.suggest, .mini-reward, .animal-art[class*='motion-'] *, .animal-art[class*='play-'] * { animation: none !important; } }
+@keyframes play-nudge { 0%,80%,100% { transform: translateY(-50%) rotate(0); } 85%,95% { transform: translateY(-50%) rotate(-5deg); } 90% { transform: translateY(-50%) rotate(5deg); } }
+@keyframes bubble-drift { 0%,100% { transform: translate(0,0) rotate(-2deg); } 50% { transform: translate(2px,-4px) rotate(2deg); } }
+@keyframes peek-left { to { transform: translateX(-90px) rotate(-18deg); opacity: .6; } } @keyframes peek-right { to { transform: translateX(90px) rotate(18deg); opacity: .6; } }
+@keyframes garden-bloom { to { opacity: .2; } }
+@keyframes play-particle { 0% { opacity: 0; transform: scale(.25); } 20% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--dx),var(--dy)) rotate(var(--turn)) scale(.5); } }
+@keyframes reward-pop { from { opacity: 0; scale: .6; } to { opacity: 1; scale: 1; } }
+@keyframes sniff { 25%,65% { transform: translateY(3px) rotate(-2deg); } 45%,85% { transform: translateY(-1px); } }
+@keyframes nose-twitch { 45% { transform: translateY(-2px) scale(1.08); } }
+@keyframes ear-follow { 40% { transform: rotate(4deg); } 70% { transform: rotate(-2deg); } }
+@keyframes ear-perk-left { 20% { transform: rotate(3deg); } 48% { transform: rotate(-11deg); } 75% { transform: rotate(3deg); } }
+@keyframes ear-perk-right { 20% { transform: rotate(-2deg); } 48% { transform: rotate(9deg); } 75% { transform: rotate(-3deg); } }
+@keyframes head-look { 30% { transform: rotate(5deg) translateY(-2px); } 65% { transform: rotate(-2deg); } }
+@keyframes friendly-wave { 25%,65% { transform: rotate(24deg) translateY(-14px); } 45%,80% { transform: rotate(10deg) translateY(-8px); } }
+@keyframes cheek-puff { 40% { transform: scale(1.22,1.12); } }
+@keyframes tail-curl { 25% { transform: rotate(8deg); } 55% { transform: rotate(-6deg); } 80% { transform: rotate(3deg); } }
+@keyframes yawn { 40% { transform: scale(.7,1.4); } }
+@keyframes sleepy-eyes { 30%,60% { transform: scaleY(.2); } }
+@keyframes yawn-hand { 40% { transform: translate(-30px,-54px) rotate(24deg); } }
+@keyframes belly-breathe { 45% { transform: scale(1.035,1.02); } }
+@keyframes belly-pat { 25%,65% { transform: translate(-29px,9px) rotate(15deg); } 45% { transform: translate(-23px,6px) rotate(11deg); } }
+@keyframes soft-sway { 30% { transform: rotate(-4deg); } 65% { transform: rotate(4deg); } }
+@keyframes head-follow { 30% { transform: rotate(2deg); } 65% { transform: rotate(-2deg); } }
+@keyframes soft-hop { 16% { transform: scale(1.04,.96); } 45% { transform: translateY(var(--hop-height,-24px)) scale(.98,1.02); } 78% { transform: scale(1.04,.97); } }
+@keyframes hop-shadow { 45% { transform: scaleX(.78); opacity: .07; } }
+@keyframes soft-clap-left { 20% { transform: rotate(6deg); } 48%,60% { transform: translate(48px,-10px) rotate(-25deg); } }
+@keyframes soft-clap-right { 20% { transform: rotate(-6deg); } 48%,60% { transform: translate(-48px,-10px) rotate(25deg); } }
+@keyframes clap-nod { 50% { transform: translateY(4px) rotate(2deg); } }
+@keyframes gentle-roll { 20% { transform: rotate(-9deg) translateX(-5px); } 55% { transform: rotate(17deg) translateX(12px); } 80% { transform: rotate(-3deg); } }
+@keyframes roll-hand { 55% { transform: rotate(15deg) translateY(-5px); } }
+@keyframes content-eyes { 20%,75% { transform: scaleY(.25); } }
+@keyframes peek-look { 35% { transform: translateY(-8px) rotate(-4deg); } 65% { transform: rotate(3deg); } }
+@keyframes reach-bubble { 40% { transform: rotate(-18deg) translateY(-16px); } }
+@media (max-width: 360px) { .order-area .play-launch { width: 60px; right: 5px; }.finish-action .finish-buttons { gap: 7px; }.finish-action .primary-button { width: 84px; height: 84px; padding: 18px; } }
+@media (max-height: 680px) { .mini-caption { top: -104px; height: 98px; }.mini-caption > svg { width: 28px; height: 28px; }.mini-caption strong { font-size: 15px; }.mini-target:not(.target-pet):not(.target-peek) { height: 64px; width: 82px; }.mini-target > .play-art { width: 27px; height: 27px; }.mini-target strong { font-size: 16px; }.mini-bubble { width: 58px; height: 58px; }.mini-reward { bottom: 0; }.mini-reward span { display: none; }.mini-reward strong { font-size: 21px; } }
+@media (prefers-reduced-motion: reduce) { .mini-mode-reward .peek-left, .mini-mode-reward .peek-right { opacity: 0; }.mini-mode-reward .garden-flower { opacity: .2; }.play-burst { display: none; } }
+.burst-bubbles i { background: #cce8e980; border: 1.5px solid #bca4d3; border-radius: 50%; }.burst-bubbles svg { display: none; }.burst-bubbles i:nth-child(2n) { border-color: #d3b77a; }
+.burst-bubbles::before { content: ''; position: absolute; width: 36px; height: 36px; margin: -18px; border: 2px solid #abcfd0; border-radius: 50%; animation: bubble-pop .45s ease-out both; }
+.burst-clap { color: #a48bb8; }
+.animal-art.motion-yawn .chew-mouth { opacity: 1; }.animal-art.motion-yawn .mouth > path { opacity: 0; }
+@keyframes bubble-pop { from { opacity: .85; scale: .3; } to { opacity: 0; scale: 1.8; } }
+@media (prefers-reduced-motion: reduce) { .play-burst::before { display: none; } }
+@media (max-height: 680px) { .target-pet { height: calc(73% + 24px); bottom: -24px; } }

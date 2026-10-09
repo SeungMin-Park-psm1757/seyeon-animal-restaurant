@@ -97,4 +97,20 @@ describe('optional local audio', () => {
     vi.stubGlobal('AudioContext', class { constructor() { throw Error('unsupported'); } });
     expect(() => { unlockAudio(); sound('finish', false); }).not.toThrow();
   });
+  it('plays all six quiet activity cues and respects master mute', () => {
+    const start = vi.fn();
+    const ramp = vi.fn();
+    vi.stubGlobal('AudioContext', class {
+      state = 'running'; currentTime = 0; destination = {};
+      resume() { return Promise.resolve(); }
+      createOscillator() { return { type: '', frequency: { value: 0, exponentialRampToValueAtTime: ramp }, connect: vi.fn(), start, stop: vi.fn() }; }
+      createGain() { return { gain: { setValueAtTime: vi.fn(), linearRampToValueAtTime: vi.fn(), exponentialRampToValueAtTime: vi.fn() }, connect: vi.fn() }; }
+    });
+    unlockAudio();
+    for (const cue of ['bubbles', 'pet', 'hop', 'clap', 'roll', 'peek'] as const) sound(cue, false);
+    expect(start).toHaveBeenCalledTimes(12);
+    expect(ramp).toHaveBeenCalledTimes(3);
+    sound('bubbles', true);
+    expect(start).toHaveBeenCalledTimes(12);
+  });
 });

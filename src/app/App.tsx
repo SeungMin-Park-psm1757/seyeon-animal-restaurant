@@ -2,9 +2,10 @@ import { useEffect, useReducer, useRef, useState, type CSSProperties } from 'rea
 import { registerSW } from 'virtual:pwa-register';
 import { AnimalArt } from '../assets/characters';
 import { FoodArt } from '../assets/foods';
+import { PlayArt } from '../assets/play';
 import { LeafMark, MusicMark, PlayMark, ProgressFlowers, SoundMark } from '../components/Decor';
 import { PlayEvent } from '../components/PlayEvent';
-import { nextIdleMotion, type IdleMotion } from '../game/idleMotions';
+import { MOTIONS, nextIdleMotion, type IdleMotion } from '../game/idleMotions';
 import { PLAY_BY_ID, initialPlayState, playReducer } from '../game/playEvents';
 import { ANIMALS, FOOD_NAMES, PHASE_MS, ROUNDS, makeLayouts, type FoodId } from '../game/data';
 import { initialState, reducer } from '../game/reducer';
@@ -126,7 +127,8 @@ export function App() {
   }
   function tapPlay() {
     if (play.mode !== 'active' || !play.id) return;
-    sound(play.steps + 1 >= PLAY_BY_ID[play.id].taps ? 'joy' : 'tap', muted);
+    sound(play.id, muted);
+    if (play.steps + 1 >= PLAY_BY_ID[play.id].taps) sound('joy', muted);
     playDispatch({ type: 'tap' });
   }
   function start(restart = false, continuePlay = false) {
@@ -175,18 +177,18 @@ export function App() {
       <div className="welcome-bottom"><span className="mini-leaf"><LeafMark /></span><span>{offlineReady ? '인터넷 없이도 놀 수 있어요' : '오늘도 다정한 한 끼'}</span></div>
     </section>}
 
-    {playing && <section className="play-screen">
+    {playing && <section className={`play-screen ${play.mode !== 'idle' ? 'has-event' : ''}`}>
       <div className={`order-area ${state.idleHint ? 'idle-hint' : ''}`}>
-        <div className="friend-caption"><span className="friend-dot" style={{ background: animal.color }} />{animal.species} {animal.name}</div>
+        <div className="friend-caption"><span className="friend-dot" style={{ background: animal.color }} /><span>{animal.species}</span><span>{animal.name}</span></div>
         <div className={`order-bubble ${state.mistakesInRound > 0 ? 'nudge' : ''}`} key={`${state.roundIndex}-${state.mistakesInRound}`} aria-label={`${animal.name}는 ${FOOD_NAMES[animal.food]}을 먹고 싶어요`}><FoodArt id={animal.food} /><span>{state.phase === 'celebrating' ? '고마워!' : '냠냠 주세요'}</span></div>
         <button type="button" className={`play-launch ${state.roundIndex > 0 ? 'suggest' : ''}`} aria-label="동물과 놀기" onClick={openPlay} disabled={state.phase !== 'ready' || play.mode !== 'idle'}>
-          <span className="play-launch-icon" aria-hidden="true">🫧</span><strong>놀자!</strong>
+          <span className="play-launch-icon" aria-hidden="true"><PlayArt id="bubbles" /></span><strong>놀자!</strong>
         </button>
       </div>
       <div className={`stage ${state.phase === 'transitioning' ? 'entering' : ''}`}>
         <div className="scene-leaves left" aria-hidden="true"><LeafMark /></div><div className="scene-leaves right" aria-hidden="true"><LeafMark /></div>
         <div className={`animal-zone ${state.phase === 'dragging' ? 'drop-active' : ''}`} data-testid="drop-zone" ref={zone} aria-label={`${animal.name}에게 밥 주는 곳`}>
-          <AnimalArt key={`${animalId}-${play.id}-${play.steps}-${idleMotion ?? ''}`} id={animalId} mood={mood} motion={state.phase === 'ready' && play.mode === 'idle' ? idleMotion : null} play={playMotion} />
+          <AnimalArt key={`${animalId}-${play.id}-${play.steps}-${idleMotion ?? ''}`} id={animalId} mood={play.mode === 'idle' ? mood : 'idle'} motion={state.phase === 'ready' && play.mode === 'idle' && idleMotion && MOTIONS[animalId].includes(idleMotion) ? idleMotion : null} play={playMotion} />
           {state.phase === 'celebrating' && <div className="joy-sparkles" aria-hidden="true"><span>✦</span><span>✧</span><span>✦</span></div>}
         </div>
         {state.phase === 'ready' && <PlayEvent state={play} onTap={tapPlay} onClose={() => playDispatch({ type: 'close' })} />}

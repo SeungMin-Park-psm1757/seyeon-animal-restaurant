@@ -19,7 +19,7 @@ export function unlockAudio() {
     void context.resume().catch(() => {});
   } catch { /* Silent play works without Web Audio. */ }
 }
-const melodies = { tap: [660], enter: [440, 550], success: [660, 880], joy: [784, 1046], finish: [523, 659, 784, 1046] };
+const melodies = { tap: [660], enter: [440, 550], success: [660, 880], joy: [784, 1046], finish: [523, 659, 784, 1046], bubbles: [1175], pet: [392, 494], hop: [330, 660], clap: [740, 740], roll: [523, 440, 330], peek: [659, 988] };
 export function sound(kind: keyof typeof melodies, muted: boolean) {
   if (muted || !context || context.state !== 'running') return;
   try {
@@ -28,6 +28,7 @@ export function sound(kind: keyof typeof melodies, muted: boolean) {
       const oscillator = context!.createOscillator();
       const gain = context!.createGain();
       oscillator.type = 'sine'; oscillator.frequency.value = frequency;
+      if (kind === 'bubbles' || kind === 'hop') oscillator.frequency.exponentialRampToValueAtTime(frequency * (kind === 'bubbles' ? .42 : 1.35), start + .12);
       gain.gain.setValueAtTime(0, start);
       gain.gain.linearRampToValueAtTime(.055, start + .015);
       gain.gain.exponentialRampToValueAtTime(.001, start + .16);

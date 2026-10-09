@@ -1,0 +1,13 @@
+{
+  "runs": 6,
+  "touches": 18,
+  "durationsMs": [
+    146,
+    149,
+    149,
+    150,
+    149,
+    149
+  ],
+  "stableTargets": true
+}

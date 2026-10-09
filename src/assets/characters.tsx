@@ -15,11 +15,11 @@ export function AnimalArt({ id, mood = 'idle', motion, play }: {
     <ellipse className="animal-shadow" cx="256" cy="467" rx="115" ry="15" fill="#755c63" opacity=".12" stroke="none" />
     <g className="animal-body">
       {monkey && <path className="tail" d="M338 389c106 17 118-69 79-83-25-9-45 18-23 32" stroke="#a6755b" strokeWidth="24" />}
-      <ellipse cx="256" cy="376" rx={monkey ? 85 : 99} ry="89" fill={fur} />
+      <ellipse className="belly" cx="256" cy="376" rx={monkey ? 85 : 99} ry="89" fill={fur} />
       {id === 'panda' && <path d="M164 346c37 28 148 28 184 0l-5 37c-52 27-125 27-179-2Z" fill="#595963" stroke="none" />}
       <ellipse cx="197" cy="448" rx="40" ry="22" fill={id === 'panda' ? '#595963' : fur} />
       <ellipse cx="315" cy="448" rx="40" ry="22" fill={id === 'panda' ? '#595963' : fur} />
-      <path d="M208 311c15 18 80 18 96 0l25 106c-47 23-96 23-145 0Z" fill={rabbit ? '#bedfd0' : monkey ? '#e4d5f3' : '#ffe6a1'} />
+      <path className="apron" d="M208 311c15 18 80 18 96 0l25 106c-47 23-96 23-145 0Z" fill={rabbit ? '#bedfd0' : monkey ? '#e4d5f3' : '#ffe6a1'} />
       <path d="M232 381h48v28c-15 10-32 10-48 0Z" fill="#fff8ee" strokeWidth="4" />
       <path d="m248 392 8 8 8-8" stroke="#d8979c" strokeWidth="5" />
       <g className="hand hand-left"><ellipse cx="170" cy="360" rx="24" ry="40" transform="rotate(25 170 360)" fill={id === 'panda' ? '#595963' : fur} /></g>
@@ -48,7 +48,7 @@ export function AnimalArt({ id, mood = 'idle', motion, play }: {
           <ellipse cx="219" cy="232" rx="7" ry="10" fill={id === 'panda' ? '#fffdf7' : '#755c63'} stroke="none" />
           <ellipse cx="293" cy="232" rx="7" ry="10" fill={id === 'panda' ? '#fffdf7' : '#755c63'} stroke="none" />
         </g>
-        <path d="M248 253q8-6 16 0l-8 7Z" fill="#d38d9d" strokeWidth="3" />
+        <path className="nose" d="M248 253q8-6 16 0l-8 7Z" fill="#d38d9d" strokeWidth="3" />
         <g className="mouth"><path d="M241 277q15 20 30 0" strokeWidth="5" /><ellipse className="chew-mouth" cx="256" cy="283" rx="12" ry="9" fill="#bc7c89" strokeWidth="3" /></g>
         <circle data-mouth="true" cx="256" cy="281" r="1" stroke="none" />
       </g>
