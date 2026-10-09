@@ -3,6 +3,9 @@ import { registerSW } from 'virtual:pwa-register';
 import { AnimalArt } from '../assets/characters';
 import { FoodArt } from '../assets/foods';
 import { LeafMark, MusicMark, PlayMark, ProgressFlowers, SoundMark } from '../components/Decor';
+import { PlayEvent } from '../components/PlayEvent';
+import { nextIdleMotion, type IdleMotion } from '../game/idleMotions';
+import { initialPlayState, playReducer } from '../game/playEvents';
 import { ANIMALS, FOOD_NAMES, PHASE_MS, ROUNDS, makeLayouts, type FoodId } from '../game/data';
 import { initialState, reducer } from '../game/reducer';
 import { useFeedingGesture } from '../game/useFeedingGesture';
@@ -11,6 +14,9 @@ import { readMuted, readMusicMuted, saveMuted, saveMusicMuted, sound, unlockAudi
 type Flight = { food: FoodId; fromX: number; fromY: number; toX: number; toY: number };
 export function App() {
   const [state, dispatch] = useReducer(reducer, initialState);
+  const [play, playDispatch] = useReducer(playReducer, initialPlayState);
+  const [idleMotion, setIdleMotion] = useState<IdleMotion | null>(null);
+  const previousMotion = useRef<IdleMotion | null>(null);
   const [layouts, setLayouts] = useState(makeLayouts);
   const [muted, setMuted] = useState(readMuted);
   const [musicMuted, setMusicMuted] = useState(readMusicMuted);
@@ -26,7 +32,7 @@ export function App() {
   const animal = ANIMALS[animalId];
   const hint = state.mistakesInRound >= 2 || state.idleHint;
   const playing = state.phase !== 'welcome' && state.phase !== 'finished';
-  const locked = !['ready', 'dragging'].includes(state.phase);
+  const locked = !['ready', 'dragging'].includes(state.phase) || play.mode !== 'idle';
 
   useEffect(() => {
     if (!import.meta.env.PROD || !('serviceWorker' in navigator)) return;
@@ -44,6 +50,38 @@ export function App() {
       void updateWorker.current?.(true).catch(() => {});
     }
   }, [state.phase, updatePending, reloadPending]);
+  useEffect(() => {
+    if (play.mode !== 'reward') return;
+    const timer = setTimeout(() => playDispatch({ type: 'close' }), 1200);
+    return () => clearTimeout(timer);
+  }, [play.mode, play.id]);
+  useEffect(() => {
+    if (state.phase !== 'ready' || play.mode !== 'idle') return;
+    let active = true;
+    let motionTimer: ReturnType<typeof setTimeout>;
+    let restTimer: ReturnType<typeof setTimeout>;
+    function schedule() {
+      motionTimer = setTimeout(() => {
+        if (!active) return;
+        const next = nextIdleMotion(animalId, previousMotion.current, Math.random());
+        previousMotion.current = next;
+        setIdleMotion(next);
+        restTimer = setTimeout(() => {
+          if (!active) return;
+          setIdleMotion(null);
+          schedule();
+        }, 1000);
+      }, 5200 + Math.random() * 5500);
+    }
+    schedule();
+    return () => { active = false; clearTimeout(motionTimer); clearTimeout(restTimer); };
+  }, [animalId, state.phase, play.mode]);
+  useEffect(() => {
+    // Gentle autonomous invitation, never interrupts feeding or a running event.
+    if (state.phase !== 'ready' || play.mode !== 'idle') return;
+    const timer = setTimeout(() => playDispatch({ type: 'open', animal: animalId, roll: Math.random() }), 20000);
+    return () => clearTimeout(timer);
+  }, [animalId, state.phase, play.mode]);
   useEffect(() => {
     if (state.phase === 'ready') {
       const timer = setTimeout(() => dispatch({ type: 'idle' }), 8000);
@@ -76,13 +114,26 @@ export function App() {
     dispatch({ type: 'choose', food });
     return food === animal.food;
   }
-  const gesture = useFeedingGesture({ phase: state.phase, zone, choose,
+  const gesture = useFeedingGesture({ phase: play.mode === 'idle' ? state.phase : 'celebrating', zone, choose,
     dragging: () => dispatch({ type: 'drag' }), cancel: () => dispatch({ type: 'cancel' }), unlock: unlockAudio });
 
-  function start(restart = false) {
+  function openPlay() {
+    if (state.phase !== 'ready' || play.mode !== 'idle') return;
+    unlockAudio();
+    setIdleMotion(null);
+    playDispatch({ type: 'open', animal: animalId, roll: Math.random() });
+    sound('tap', muted);
+  }
+  function tapPlay() {
+    if (play.mode !== 'active' || !play.id) return;
+    sound(play.steps + 1 >= (play.id === 'roll' ? 2 : play.id === 'peek' ? 1 : 3) ? 'joy' : 'tap', muted);
+    playDispatch({ type: 'tap' });
+  }
+  function start(restart = false, continuePlay = false) {
     unlockAudio();
     if (!muted && !musicMuted) void music.current?.play().catch(() => {});
-    setFlight(null); setLayouts(makeLayouts());
+    setFlight(null); setLayouts(makeLayouts()); setIdleMotion(null);
+    if (!continuePlay) { playDispatch({ type: 'reset' }); previousMotion.current = null; }
     dispatch({ type: restart ? 'restart' : 'start' });
   }
   function toggleSound() {
@@ -105,6 +156,7 @@ export function App() {
     if (state.phase === 'feeding' || state.phase === 'celebrating') dispatch({ type: 'next' });
   }
   const mood = state.phase === 'feeding' ? 'chewing' : state.phase === 'celebrating' ? 'delighted' : hint ? 'curious' : 'idle';
+  const playMotion = play.mode === 'active' && play.steps > 0 ? play.id : null;
 
   return <main className={`restaurant screen-${state.phase}`} data-phase={state.phase} data-round={state.roundIndex} onPointerDown={skipFeedback}>
     <header className="topbar">
@@ -127,13 +179,17 @@ export function App() {
       <div className={`order-area ${state.idleHint ? 'idle-hint' : ''}`}>
         <div className="friend-caption"><span className="friend-dot" style={{ background: animal.color }} />{animal.species} {animal.name}</div>
         <div className={`order-bubble ${state.mistakesInRound > 0 ? 'nudge' : ''}`} key={`${state.roundIndex}-${state.mistakesInRound}`} aria-label={`${animal.name}는 ${FOOD_NAMES[animal.food]}을 먹고 싶어요`}><FoodArt id={animal.food} /><span>{state.phase === 'celebrating' ? '고마워!' : '냠냠 주세요'}</span></div>
+        <button type="button" className={`play-launch ${state.roundIndex > 0 ? 'suggest' : ''}`} aria-label="동물과 놀기" onClick={openPlay} disabled={state.phase !== 'ready' || play.mode !== 'idle'}>
+          <span className="play-launch-icon" aria-hidden="true">🫧</span><strong>놀자!</strong>
+        </button>
       </div>
       <div className={`stage ${state.phase === 'transitioning' ? 'entering' : ''}`}>
         <div className="scene-leaves left" aria-hidden="true"><LeafMark /></div><div className="scene-leaves right" aria-hidden="true"><LeafMark /></div>
         <div className={`animal-zone ${state.phase === 'dragging' ? 'drop-active' : ''}`} data-testid="drop-zone" ref={zone} aria-label={`${animal.name}에게 밥 주는 곳`}>
-          <AnimalArt id={animalId} mood={mood} />
+          <AnimalArt key={`${animalId}-${play.id}-${play.steps}-${idleMotion ?? ''}`} id={animalId} mood={mood} motion={state.phase === 'ready' && play.mode === 'idle' ? idleMotion : null} play={playMotion} />
           {state.phase === 'celebrating' && <div className="joy-sparkles" aria-hidden="true"><span>✦</span><span>✧</span><span>✦</span></div>}
         </div>
+        {state.phase === 'ready' && <PlayEvent state={play} onTap={tapPlay} onClose={() => playDispatch({ type: 'close' })} />}
         <div className="ground" aria-hidden="true" />
       </div>
       <ProgressFlowers count={state.progressFlowers} />
@@ -153,7 +209,10 @@ export function App() {
       <div className="confetti" aria-hidden="true">{Array.from({ length: 10 }, (_, i) => <i key={i} style={{ '--i': i } as CSSProperties} />)}</div>
       <div className="friends-together">{(['rabbit', 'monkey', 'panda'] as const).map(id => <div key={id}><AnimalArt id={id} mood="delighted" /><span>{ANIMALS[id].name}</span></div>)}</div>
       <ProgressFlowers count={6} />
-      <div className="finish-action"><button className="primary-button" aria-label="다시 놀기" onClick={() => start(true)}><PlayMark restart /></button><p>한 번 더 놀까요?</p></div>
+      <div className="finish-action"><div className="finish-buttons">
+        <button className="primary-button continue-play" aria-label="계속 놀기" onClick={() => start(true, true)}><PlayMark /></button>
+        <button className="primary-button" aria-label="다시 놀기" onClick={() => start(true)}><PlayMark restart /></button>
+      </div><p>또 놀아요! ♡</p></div>
     </section>}
 
     {gesture.ghost && <div className={`drag-ghost ${gesture.ghost.returning ? 'returning' : ''}`} style={{ left: gesture.ghost.x, top: gesture.ghost.y - 42 }} aria-hidden="true"><FoodArt id={gesture.ghost.food} /></div>}
