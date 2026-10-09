@@ -5,7 +5,7 @@ import { FoodArt } from '../assets/foods';
 import { LeafMark, MusicMark, PlayMark, ProgressFlowers, SoundMark } from '../components/Decor';
 import { PlayEvent } from '../components/PlayEvent';
 import { nextIdleMotion, type IdleMotion } from '../game/idleMotions';
-import { initialPlayState, playReducer } from '../game/playEvents';
+import { PLAY_BY_ID, initialPlayState, playReducer } from '../game/playEvents';
 import { ANIMALS, FOOD_NAMES, PHASE_MS, ROUNDS, makeLayouts, type FoodId } from '../game/data';
 import { initialState, reducer } from '../game/reducer';
 import { useFeedingGesture } from '../game/useFeedingGesture';
@@ -126,7 +126,7 @@ export function App() {
   }
   function tapPlay() {
     if (play.mode !== 'active' || !play.id) return;
-    sound(play.steps + 1 >= (play.id === 'roll' ? 2 : play.id === 'peek' ? 1 : 3) ? 'joy' : 'tap', muted);
+    sound(play.steps + 1 >= PLAY_BY_ID[play.id].taps ? 'joy' : 'tap', muted);
     playDispatch({ type: 'tap' });
   }
   function start(restart = false, continuePlay = false) {
@@ -156,7 +156,7 @@ export function App() {
     if (state.phase === 'feeding' || state.phase === 'celebrating') dispatch({ type: 'next' });
   }
   const mood = state.phase === 'feeding' ? 'chewing' : state.phase === 'celebrating' ? 'delighted' : hint ? 'curious' : 'idle';
-  const playMotion = play.mode === 'active' && play.steps > 0 ? play.id : null;
+  const playMotion = play.mode !== 'idle' && play.steps > 0 ? play.id : null;
 
   return <main className={`restaurant screen-${state.phase}`} data-phase={state.phase} data-round={state.roundIndex} onPointerDown={skipFeedback}>
     <header className="topbar">
