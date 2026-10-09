@@ -29,6 +29,7 @@ export function App() {
   const zone = useRef<HTMLDivElement>(null);
   const music = useRef<HTMLAudioElement>(null);
   const feedbackStarted = useRef(0);
+  const lastInteractionAt = useRef(Date.now());
   const animalId = ROUNDS[state.roundIndex];
   const animal = ANIMALS[animalId];
   const hint = state.mistakesInRound >= 2 || state.idleHint;
@@ -78,14 +79,32 @@ export function App() {
     return () => { active = false; clearTimeout(motionTimer); clearTimeout(restTimer); };
   }, [animalId, state.phase, play.mode]);
   useEffect(() => {
-    // Gentle autonomous invitation, never interrupts feeding or a running event.
+    // Invite after 20 seconds without real input, not 20 seconds after entering ready.
+    // A child may be touching a wrong food repeatedly; that is still active play.
     if (state.phase !== 'ready' || play.mode !== 'idle') return;
-    const timer = setTimeout(() => playDispatch({ type: 'open', animal: animalId, roll: Math.random() }), 20000);
-    return () => clearTimeout(timer);
+    let timer: ReturnType<typeof setTimeout>;
+    const schedule = () => {
+      const remaining = Math.max(1, 20000 - (Date.now() - lastInteractionAt.current));
+      timer = setTimeout(() => {
+        if (document.hidden) return; // Foreground handler restarts the clock.
+        if (Date.now() - lastInteractionAt.current < 20000) { schedule(); return; }
+        setIdleMotion(null);
+        dispatch({ type: 'activity' });
+        playDispatch({ type: 'open', animal: animalId, roll: Math.random() });
+      }, remaining);
+    };
+    const onVisibility = () => {
+      clearTimeout(timer);
+      if (!document.hidden) { lastInteractionAt.current = Date.now(); schedule(); }
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+    if (!document.hidden) schedule();
+    return () => { clearTimeout(timer); document.removeEventListener('visibilitychange', onVisibility); };
   }, [animalId, state.phase, play.mode]);
   useEffect(() => {
+    if (state.phase === 'ready' && play.mode !== 'idle') return;
     if (state.phase === 'ready') {
-      const timer = setTimeout(() => dispatch({ type: 'idle' }), 8000);
+      const timer = setTimeout(() => { if (!document.hidden) dispatch({ type: 'idle' }); }, 8000);
       return () => clearTimeout(timer);
     }
     const duration = PHASE_MS[state.phase as keyof typeof PHASE_MS];
@@ -93,7 +112,7 @@ export function App() {
     const action = state.phase === 'feeding' ? 'chewed' : state.phase === 'celebrating' ? 'next' : 'arrived';
     const timer = setTimeout(() => dispatch({ type: action }), duration);
     return () => clearTimeout(timer);
-  }, [state.phase, state.roundIndex, state.mistakesInRound]);
+  }, [state.phase, state.roundIndex, state.mistakesInRound, play.mode]);
   useEffect(() => {
     if (state.phase === 'feeding') { feedbackStarted.current = performance.now(); sound('success', muted); }
     if (state.phase === 'celebrating') sound('joy', muted);
@@ -120,6 +139,8 @@ export function App() {
 
   function openPlay() {
     if (state.phase !== 'ready' || play.mode !== 'idle') return;
+    lastInteractionAt.current = Date.now();
+    dispatch({ type: 'activity' });
     unlockAudio();
     setIdleMotion(null);
     playDispatch({ type: 'open', animal: animalId, roll: Math.random() });
@@ -139,6 +160,7 @@ export function App() {
     dispatch({ type: restart ? 'restart' : 'start' });
   }
   function toggleSound() {
+    lastInteractionAt.current = Date.now();
     unlockAudio();
     const next = !muted;
     saveMuted(next); setMuted(next);
@@ -146,6 +168,7 @@ export function App() {
     else void music.current?.play().catch(() => {});
   }
   function toggleMusic() {
+    lastInteractionAt.current = Date.now();
     unlockAudio();
     const next = !musicMuted;
     saveMusicMuted(next); setMusicMuted(next);
@@ -160,7 +183,7 @@ export function App() {
   const mood = state.phase === 'feeding' ? 'chewing' : state.phase === 'celebrating' ? 'delighted' : hint ? 'curious' : 'idle';
   const playMotion = play.mode !== 'idle' && play.steps > 0 ? play.id : null;
 
-  return <main className={`restaurant screen-${state.phase}`} data-phase={state.phase} data-round={state.roundIndex} onPointerDown={skipFeedback}>
+  return <main className={`restaurant screen-${state.phase}`} data-phase={state.phase} data-round={state.roundIndex} onPointerDown={() => { lastInteractionAt.current = Date.now(); skipFeedback(); }} onKeyDown={() => { lastInteractionAt.current = Date.now(); }}>
     <header className="topbar">
       <div className="brand"><LeafMark /><div><span>세연이의</span><strong>냠냠 동물식당</strong></div></div>
       <div className="sound-controls" role="group" aria-label="소리 설정">
