@@ -23,8 +23,11 @@ try {
   assert.equal(scope, url);
   const sizes = await page.locator('.brand strong').evaluate(el => getComputedStyle(el).fontSize);
   assert.equal(sizes, '22px');
+  const music = page.locator('audio');
   async function finish() {
     await page.getByRole('button', { name: '놀이 시작' }).tap();
+    await expect.poll(() => music.evaluate(audio => !audio.paused)).toBe(true);
+    await expect.poll(() => music.evaluate(audio => audio.currentTime)).toBeGreaterThan(0);
     for (const [round, food] of ['carrot', 'banana', 'bamboo', 'carrot', 'banana', 'bamboo'].entries()) {
       await expect(page.locator('main')).toHaveAttribute('data-round', String(round));
       await expect(page.locator('main')).toHaveAttribute('data-phase', 'ready');
@@ -37,6 +40,10 @@ try {
     await expect(page.getByRole('button', { name: '다시 놀기' })).toBeVisible();
     await expect(page.locator('.friends-together [data-animal]')).toHaveCount(3);
   }
+  await page.getByRole('button', { name: '배경음악 끄기', exact: true }).tap();
+  await expect.poll(() => music.evaluate(audio => audio.paused)).toBe(true);
+  await page.getByRole('button', { name: '배경음악 켜기', exact: true }).tap();
+  await expect.poll(() => music.evaluate(audio => !audio.paused)).toBe(true);
   await finish();
   await page.getByRole('button', { name: '다시 놀기' }).tap();
   await expect(page.locator('main')).toHaveAttribute('data-round', '0');
@@ -53,7 +60,7 @@ try {
   await expect(desktop.locator('.animal-zone')).toHaveCSS('opacity', '1');
   await desktop.screenshot({ path: 'qa/screenshots/live-desktop-play.png' });
   assert.deepEqual(errors, []);
-  const result = { testedAt: new Date().toISOString(), url, commit, status: 'PASS', serviceWorkerScope: scope, titleFont: sizes, onlineSixFeeds: true, restart: true, offlineReloadAndSixFeeds: true, desktopStart: true, errors };
+  const result = { testedAt: new Date().toISOString(), url, commit, status: 'PASS', serviceWorkerScope: scope, titleFont: sizes, backgroundMusic: true, musicOnlyMute: true, onlineSixFeeds: true, restart: true, offlineReloadAndSixFeeds: true, desktopStart: true, errors };
   await writeFile('qa/live-result.json', JSON.stringify(result, null, 2) + '\n');
   console.log(JSON.stringify(result));
 } finally { await browser.close(); }
