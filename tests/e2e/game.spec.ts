@@ -65,6 +65,9 @@ async function assertReadableText(page: Page) {
   const problems = await page.evaluate(() => {
     const selectors = '.brand span, .brand strong, .eyebrow, h1, .tiny-flourish span, .welcome-action p, .welcome-bottom span:last-child, .friend-caption, .order-bubble span, .tray-caption, .food-card span, .finish-copy p, .friends-together span, .finish-action p';
     const issues: string[] = [];
+    const brand = document.querySelector('.brand')!.getBoundingClientRect();
+    const controls = document.querySelector('.sound-controls')!.getBoundingClientRect();
+    if (brand.right > controls.left - 2 || controls.right > innerWidth) issues.push('topbar controls overlap or leave the screen');
     document.querySelectorAll<HTMLElement>(selectors).forEach(element => {
       if (!element.getBoundingClientRect().width) return;
       const container = element.closest('.topbar, .welcome-copy, .welcome-action, .welcome-bottom, .order-area, .order-bubble, .food-tray, .finish-copy, .friends-together, .finish-action')!;
@@ -201,7 +204,7 @@ test('app loses focus mid-drag and safely accepts the next tap', async ({ page }
   await card(page, 'carrot').tap();
   await expect(page.locator('.progress-flowers')).toHaveAttribute('data-count', '1');
 });
-test('mute persists; Web Audio starts only with input and plays quiet tones', async ({ page }) => {
+test('master mute persists; Web Audio starts only with input and plays quiet tones', async ({ page }) => {
   await page.addInitScript(() => {
     const Native = window.AudioContext;
     const audit = { contexts: 0, starts: 0, maxGain: 0 };
@@ -220,14 +223,14 @@ test('mute persists; Web Audio starts only with input and plays quiet tones', as
   });
   await page.goto('/');
   expect(await page.evaluate(() => (window as any).audioAudit.contexts)).toBe(0);
-  await page.getByRole('button', { name: '소리 끄기' }).tap();
-  await page.reload(); await expect(page.getByRole('button', { name: '소리 켜기' })).toHaveAttribute('aria-pressed', 'true');
-  await page.getByRole('button', { name: '소리 켜기' }).tap();
+  await page.getByRole('button', { name: '효과음과 배경음악 끄기' }).tap();
+  await page.reload(); await expect(page.getByRole('button', { name: '효과음과 배경음악 켜기' })).toHaveAttribute('aria-pressed', 'true');
+  await page.getByRole('button', { name: '효과음과 배경음악 켜기' }).tap();
   await page.getByRole('button', { name: '놀이 시작' }).tap();
   await card(page, 'carrot').tap();
   await expect.poll(() => page.evaluate(() => (window as any).audioAudit.starts)).toBeGreaterThan(0);
   expect(await page.evaluate(() => (window as any).audioAudit.maxGain)).toBeLessThanOrEqual(.055);
-  await page.getByRole('button', { name: '소리 끄기' }).tap();
+  await page.getByRole('button', { name: '효과음과 배경음악 끄기' }).tap();
   const starts = await page.evaluate(() => (window as any).audioAudit.starts);
   await page.waitForTimeout(2200);
   expect(await page.evaluate(() => (window as any).audioAudit.starts)).toBe(starts);
@@ -237,8 +240,50 @@ test('denied storage/audio still permits a six-round run', async ({ page }) => {
     Object.defineProperty(window, 'localStorage', { get() { throw new Error('blocked storage'); } });
     window.AudioContext = class { constructor() { throw new Error('blocked audio'); } } as any;
   });
-  await start(page); await expect(page.getByRole('button', { name: '소리 켜기' })).toBeVisible();
+  await start(page); await expect(page.getByRole('button', { name: '효과음과 배경음악 켜기' })).toBeVisible();
   await complete(page);
+});
+test('background music precaches offline and toggles independently from master sound', async ({ page, context }) => {
+  await page.goto('/');
+  await page.evaluate(async () => {
+    await navigator.serviceWorker.ready;
+    if (!navigator.serviceWorker.controller) await new Promise<void>(resolve => navigator.serviceWorker.addEventListener('controllerchange', () => resolve(), { once: true }));
+  });
+  const track = page.locator('audio');
+  const source = await track.getAttribute('src');
+  await context.setOffline(true);
+  const cached = await page.evaluate(async url => {
+    const response = await fetch(new URL(url!, location.href));
+    return response.ok && response.headers.get('content-type')?.includes('audio/mpeg');
+  }, source);
+  expect(cached).toBe(true);
+  await context.setOffline(false);
+  await page.getByRole('button', { name: '놀이 시작' }).tap();
+  await expect.poll(() => track.evaluate(audio => audio.paused)).toBe(false);
+  await expect.poll(() => track.evaluate(audio => audio.currentTime)).toBeGreaterThan(0);
+  await page.getByRole('button', { name: '배경음악 끄기', exact: true }).tap();
+  await expect.poll(() => track.evaluate(audio => audio.paused)).toBe(true);
+  await expect(page.getByRole('button', { name: '효과음과 배경음악 끄기' })).toHaveAttribute('aria-pressed', 'false');
+  await card(page, 'carrot').tap();
+  await expect(page.locator('.progress-flowers')).toHaveAttribute('data-count', '1');
+  await page.getByRole('button', { name: '배경음악 켜기', exact: true }).tap();
+  await expect.poll(() => track.evaluate(audio => audio.paused)).toBe(false);
+  await page.getByRole('button', { name: '효과음과 배경음악 끄기' }).tap();
+  await expect.poll(() => track.evaluate(audio => audio.paused)).toBe(true);
+  await page.getByRole('button', { name: '효과음과 배경음악 켜기' }).tap();
+  await expect.poll(() => track.evaluate(audio => audio.paused)).toBe(false);
+  await page.getByRole('button', { name: '배경음악 끄기', exact: true }).tap();
+  expect(await page.evaluate(() => localStorage.getItem('seyeon-restaurant-muted'))).toBe('false');
+  expect(await page.evaluate(() => localStorage.getItem('seyeon-restaurant-music-muted'))).toBe('true');
+  await page.reload();
+  await expect(page.getByRole('button', { name: '배경음악 켜기', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByRole('button', { name: '효과음과 배경음악 끄기' })).toHaveAttribute('aria-pressed', 'false');
+  await expect(track).toHaveJSProperty('paused', true);
+  await context.setOffline(true);
+  await page.getByRole('button', { name: '배경음악 켜기', exact: true }).tap();
+  await page.getByRole('button', { name: '놀이 시작' }).tap();
+  await expect.poll(() => track.evaluate(audio => audio.paused)).toBe(false);
+  await context.setOffline(false);
 });
 test('cached app reloads offline and completes without network or external requests', async ({ page, context }) => {
   const external: string[] = [];

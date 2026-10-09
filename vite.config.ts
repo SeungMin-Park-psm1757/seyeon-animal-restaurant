@@ -18,7 +18,7 @@ export default defineConfig({
         { src: 'icons/icon-maskable.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }
       ]
     },
-    workbox: { globPatterns: ['**/*.{js,css,html,png,svg,webmanifest}'], cleanupOutdatedCaches: true, clientsClaim: true }
+    workbox: { globPatterns: ['**/*.{js,css,html,mp3,png,svg,webmanifest}'], maximumFileSizeToCacheInBytes: 4 * 1024 * 1024, cleanupOutdatedCaches: true, clientsClaim: true }
   })],
   test: { include: ['tests/unit/**/*.test.ts'] }
 });

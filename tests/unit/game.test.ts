@@ -1,7 +1,7 @@
 import { describe, expect, it, vi, afterEach } from 'vitest';
 import { ANIMALS, FOODS, ROUNDS, inside, makeLayouts } from '../../src/game/data';
 import { initialState, reducer } from '../../src/game/reducer';
-import { readMuted, saveMuted, sound, unlockAudio } from '../../src/audio/audioEngine';
+import { readMuted, readMusicMuted, saveMuted, saveMusicMuted, sound, unlockAudio } from '../../src/audio/audioEngine';
 
 afterEach(() => vi.unstubAllGlobals());
 describe('six gentle rounds', () => {
@@ -80,6 +80,14 @@ describe('optional local audio', () => {
     vi.stubGlobal('localStorage', { getItem: () => 'true', setItem });
     expect(readMuted()).toBe(true); saveMuted(false);
     expect(setItem).toHaveBeenCalledExactlyOnceWith('seyeon-restaurant-muted', 'false');
+  });
+  it('persists the background-music mute separately from master sound', () => {
+    const values = new Map<string, string>();
+    vi.stubGlobal('localStorage', { getItem: (key: string) => values.get(key) ?? null, setItem: (key: string, value: string) => values.set(key, value) });
+    saveMuted(true); saveMusicMuted(true);
+    expect(readMuted()).toBe(true); expect(readMusicMuted()).toBe(true);
+    saveMusicMuted(false);
+    expect(readMuted()).toBe(true); expect(readMusicMuted()).toBe(false);
   });
   it('stays safe and muted when storage access is denied', () => {
     vi.stubGlobal('localStorage', { getItem: () => { throw Error('denied'); }, setItem: () => { throw Error('denied'); } });

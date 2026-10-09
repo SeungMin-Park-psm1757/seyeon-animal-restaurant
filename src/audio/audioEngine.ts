@@ -1,9 +1,16 @@
 export const MUTE_KEY = 'seyeon-restaurant-muted';
+export const MUSIC_MUTE_KEY = 'seyeon-restaurant-music-muted';
 export function readMuted(): boolean {
   try { return localStorage.getItem(MUTE_KEY) === 'true'; } catch { return true; }
 }
 export function saveMuted(muted: boolean) {
   try { localStorage.setItem(MUTE_KEY, String(muted)); } catch { /* Storage is optional. */ }
+}
+export function readMusicMuted(): boolean {
+  try { return localStorage.getItem(MUSIC_MUTE_KEY) === 'true'; } catch { return true; }
+}
+export function saveMusicMuted(muted: boolean) {
+  try { localStorage.setItem(MUSIC_MUTE_KEY, String(muted)); } catch { /* Storage is optional. */ }
 }
 let context: AudioContext | undefined;
 export function unlockAudio() {

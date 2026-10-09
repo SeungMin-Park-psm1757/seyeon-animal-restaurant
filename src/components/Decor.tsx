@@ -18,3 +18,6 @@ export function PlayMark({ restart = false }: { restart?: boolean }) {
 export function SoundMark({ muted }: { muted: boolean }) {
   return <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h5l7-6v20l-7-6H5Z" />{muted ? <path d="m22 12 7 8m0-8-7 8" /> : <><path d="M22 11q6 5 0 10m4-15q10 10 0 20" /></>}</svg>;
 }
+export function MusicMark({ muted }: { muted: boolean }) {
+  return <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M13 24V8l14-3v16M13 12l14-3" />{muted ? <path d="m4 4 24 24" /> : <><ellipse cx="9" cy="25" rx="4" ry="3" transform="rotate(-15 9 25)" /><ellipse cx="23" cy="21" rx="4" ry="3" transform="rotate(-15 23 21)" /></>}</svg>;
+}

@@ -8,8 +8,8 @@
 |---|---|---|
 | 의존성 설치 | PASS | `npm install --no-fund --no-audit`; lockfile 저장 |
 | 타입 검사·프로덕션 빌드 | PASS | `npm run build`; React/Vite, Service Worker 및 manifest 생성 |
-| Vitest | PASS — 10개 | 순서/매핑, 배치 불변식, 오답/힌트 초기화, 중복 진행 잠금, 6회 종료·재시작, 드래그 취소·드롭 경계, 저장/오디오 접근 실패 |
-| Playwright Chromium | PASS — 16개 | 아래 모바일·입력·오프라인·업데이트 시나리오; 실제 Chromium 156, 터치 에뮬레이션 |
+| Vitest | PASS — 11개 | 순서/매핑, 배치 불변식, 오답/힌트 초기화, 중복 진행 잠금, 6회 종료·재시작, 드래그 취소·드롭 경계, master/music 음소거 분리 저장, 저장/오디오 접근 실패 |
+| Playwright Chromium | PASS — 17개 | 아래 모바일·입력·오프라인·업데이트·오디오 시나리오; 실제 Chromium 156, 터치 에뮬레이션 |
 | 콘솔·실행 오류 | PASS | 게임 E2E의 console error/pageerror 수집 결과 빈 배열, 업데이트 E2E의 pageerror 빈 배열 |
 | 스크린샷 | PASS | 최종 실행에서 38개 PNG 생성; 등장 완료 후 기본 화면 캡처, 반응 화면은 실제 애니메이션 프레임 캡처. 이전 `desktop-drag.png`는 과거 증거로 보존하며 현재 수에 포함하지 않음 |
 | 독립 리뷰 | PASS | 2개 결함 수정 후 재리뷰; 지연된 SW 활성화 독립 재현에서도 놀이 유지·종료 후 갱신 확인 |
@@ -29,6 +29,7 @@
 | 12px 미만 움직임, 빠른 연속 탭, 연출 건너뛰기 | 탭 판정, 꽃/다음 라운드 중복 증가 없음; 오래된 타이머로 추가 진행 없음 |
 | 드래그 도중 blur | 고스트·드래그 상태 정리 후 다음 탭 정상 |
 | 음소거 저장·복원 | 첫 입력 전 AudioContext 생성 없음, 입력 후 tone 생성, gain 상한 0.055, 음소거 후 추가 tone 없음 |
+| 음악 및 음소거 분리 | 제공 MP3를 오프라인 캐시에서 fetch하고 시작 탭 후 재생; 음표 버튼은 음소거·복원, 스피커 버튼은 효과음까지 함께 음소거; 두 선택을 각각 저장·복원 |
 | 저장/Web Audio 차단 | 무음 기본값으로 6회 완주; 런타임 오류 없음 |
 | reduced-motion / 키보드 | 장식 애니메이션 꺼짐, Enter로 음식 주기 성공 |
 | 초기 캐시 후 오프라인 reload | 전체 6회 및 축하 화면 통과, 외부 요청 없음 |
@@ -79,6 +80,7 @@
 - 배포 버전: `dfd339a996e02d2d162d9cdb0aad75fc65211f88`. 공개 `build-info.json`과 일치했다. 이 문서·배포 검증 스크립트·증거 추가 커밋은 게임 코드를 변경하지 않는다.
 - [GitHub Actions 실행 37901709219](https://github.com/SeungMin-Park-psm1757/seyeon-animal-restaurant/actions/runs/37901709219): Linux에서도 단위 10개, E2E 16개 통과 후 Pages 배포 성공.
 - 2026-10-09 17:01 KST 공개 주소에서 Chromium 390×844: HTTP 200, 상단 제목 22px, 온라인 6회·재시작·오프라인 reload 후 6회·합동 축하 통과. Service Worker scope는 게임의 하위 경로와 일치, 모바일 console error/pageerror 없음. 놀이 캡처는 캐릭터 등장 애니메이션의 불투명도 1을 기다린 뒤 저장했다.
+- 사용자 제공 `Kickoff Bounce.mp3` (2분50초, 2.79 MB)는 PWA 프리캐시 상한 4 MiB 안에 포함한다. 앱 본체와 함께 최초 온라인 방문 때 저장되면 이후 오프라인 재생이 가능하다.
 - 공개 주소의 1280×900 PC에서 회전 안내 없이 시작 통과. Codex 내장 브라우저에서도 공개 시작 화면과 오프라인 준비 안내를 확인했다.
 - 근거: [`qa/live-result.json`](../qa/live-result.json), [모바일 놀이](../qa/screenshots/live-390-play.png), [오프라인 완료](../qa/screenshots/live-390-offline-finished.png), [PC 놀이](../qa/screenshots/live-desktop-play.png).
 - 재현: `node qa/verify-live.mjs https://seungmin-park-psm1757.github.io/seyeon-animal-restaurant/ dfd339a996e02d2d162d9cdb0aad75fc65211f88`.

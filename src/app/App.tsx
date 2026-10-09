@@ -2,23 +2,25 @@ import { useEffect, useReducer, useRef, useState, type CSSProperties } from 'rea
 import { registerSW } from 'virtual:pwa-register';
 import { AnimalArt } from '../assets/characters';
 import { FoodArt } from '../assets/foods';
-import { LeafMark, PlayMark, ProgressFlowers, SoundMark } from '../components/Decor';
+import { LeafMark, MusicMark, PlayMark, ProgressFlowers, SoundMark } from '../components/Decor';
 import { ANIMALS, FOOD_NAMES, PHASE_MS, ROUNDS, makeLayouts, type FoodId } from '../game/data';
 import { initialState, reducer } from '../game/reducer';
 import { useFeedingGesture } from '../game/useFeedingGesture';
-import { readMuted, saveMuted, sound, unlockAudio } from '../audio/audioEngine';
+import { readMuted, readMusicMuted, saveMuted, saveMusicMuted, sound, unlockAudio } from '../audio/audioEngine';
 
 type Flight = { food: FoodId; fromX: number; fromY: number; toX: number; toY: number };
 export function App() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [layouts, setLayouts] = useState(makeLayouts);
   const [muted, setMuted] = useState(readMuted);
+  const [musicMuted, setMusicMuted] = useState(readMusicMuted);
   const [flight, setFlight] = useState<Flight | null>(null);
   const [offlineReady, setOfflineReady] = useState(false);
   const [updatePending, setUpdatePending] = useState(false);
   const [reloadPending, setReloadPending] = useState(false);
   const updateWorker = useRef<((reload?: boolean) => Promise<void>) | undefined>(undefined);
   const zone = useRef<HTMLDivElement>(null);
+  const music = useRef<HTMLAudioElement>(null);
   const feedbackStarted = useRef(0);
   const animalId = ROUNDS[state.roundIndex];
   const animal = ANIMALS[animalId];
@@ -78,8 +80,24 @@ export function App() {
     dragging: () => dispatch({ type: 'drag' }), cancel: () => dispatch({ type: 'cancel' }), unlock: unlockAudio });
 
   function start(restart = false) {
-    unlockAudio(); setFlight(null); setLayouts(makeLayouts());
+    unlockAudio();
+    if (!muted && !musicMuted) void music.current?.play().catch(() => {});
+    setFlight(null); setLayouts(makeLayouts());
     dispatch({ type: restart ? 'restart' : 'start' });
+  }
+  function toggleSound() {
+    unlockAudio();
+    const next = !muted;
+    saveMuted(next); setMuted(next);
+    if (next || musicMuted) music.current?.pause();
+    else void music.current?.play().catch(() => {});
+  }
+  function toggleMusic() {
+    unlockAudio();
+    const next = !musicMuted;
+    saveMusicMuted(next); setMusicMuted(next);
+    if (next || muted) music.current?.pause();
+    else void music.current?.play().catch(() => {});
   }
   function skipFeedback() {
     if (performance.now() - feedbackStarted.current < 350) return;
@@ -91,7 +109,10 @@ export function App() {
   return <main className={`restaurant screen-${state.phase}`} data-phase={state.phase} data-round={state.roundIndex} onPointerDown={skipFeedback}>
     <header className="topbar">
       <div className="brand"><LeafMark /><div><span>세연이의</span><strong>냠냠 동물식당</strong></div></div>
-      <button className="sound-button" aria-label={muted ? '소리 켜기' : '소리 끄기'} aria-pressed={muted} onPointerDown={event => event.stopPropagation()} onClick={() => { unlockAudio(); saveMuted(!muted); setMuted(!muted); }}><SoundMark muted={muted} /></button>
+      <div className="sound-controls" role="group" aria-label="소리 설정">
+        <button className="sound-button" aria-label={muted ? '효과음과 배경음악 켜기' : '효과음과 배경음악 끄기'} aria-pressed={muted} title="효과음과 배경음악" onPointerDown={event => event.stopPropagation()} onClick={toggleSound}><SoundMark muted={muted} /></button>
+        <button className="sound-button music-button" aria-label={musicMuted ? '배경음악 켜기' : '배경음악 끄기'} aria-pressed={musicMuted} title="배경음악만" onPointerDown={event => event.stopPropagation()} onClick={toggleMusic}><MusicMark muted={musicMuted} /></button>
+      </div>
     </header>
     <div className="awning" aria-hidden="true"><i /><i /><i /><i /><i /><i /><i /><i /></div>
 
@@ -137,6 +158,7 @@ export function App() {
 
     {gesture.ghost && <div className={`drag-ghost ${gesture.ghost.returning ? 'returning' : ''}`} style={{ left: gesture.ghost.x, top: gesture.ghost.y - 42 }} aria-hidden="true"><FoodArt id={gesture.ghost.food} /></div>}
     {flight && state.phase === 'feeding' && <div className="flying-food" key={`${state.roundIndex}-${flight.food}`} style={{ '--from-x': `${flight.fromX}px`, '--from-y': `${flight.fromY}px`, '--to-x': `${flight.toX}px`, '--to-y': `${flight.toY}px` } as CSSProperties} aria-hidden="true"><FoodArt id={flight.food} /></div>}
+    <audio ref={music} src={`${import.meta.env.BASE_URL}audio/kickoff-bounce.mp3`} loop preload="none" aria-hidden="true" />
     <div className="rotate-overlay" role="status"><div className="rotate-phone" aria-hidden="true" /><strong>세로로 세워 주세요</strong><span>친구들이 기다리고 있어요</span></div>
   </main>;
 }
